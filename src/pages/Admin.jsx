@@ -335,12 +335,8 @@ export default function Admin() {
     setShowTestAccModal(false);
   };
 
-  const handleToggleStatus = (id) => {
-    setTestAccounts(prev => prev.map(a => a.id === id ? {...a, status: a.status === '启用' ? '禁用' : '启用'} : a));
-  };
-
   const nowISO = new Date().toISOString();
-  const effStatusFilter = (a) => (a.cancelTime < nowISO) ? '已注销' : (a.status || '启用');
+  const effStatusFilter = (a) => (a.cancelTime < nowISO) ? '已注销' : '已创建';
   const filteredTestAccounts = testAccounts.filter(a => {
     if (testAccFilters.phone && !a.phone.includes(testAccFilters.phone)) return false;
     if (testAccFilters.status && effStatusFilter(a) !== testAccFilters.status) return false;
@@ -829,7 +825,7 @@ export default function Admin() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 13, color: '#666', minWidth: 56, textAlign: 'right' }}>状态</span>
               <select value={testAccFilters.status} onChange={e => setTestAccFilters({...testAccFilters, status: e.target.value})} style={{ width: 120, height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
-                <option value="">全部</option><option value="启用">启用</option><option value="禁用">禁用</option><option value="已注销">已注销</option>
+                <option value="">全部</option><option value="已创建">已创建</option><option value="已注销">已注销</option>
               </select>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -938,7 +934,7 @@ export default function Admin() {
           {activeTab === '订单列表' && showOrderDetail && orderDetail && <OrderDetailPage order={orderDetail} onBack={() => setShowOrderDetail(false)} />}
           {activeTab === '商品审核' && <Placeholder text="商品审核" />}
           {activeTab === '用户列表' && <UserTable filters={userFilters} />}
-          {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} onToggleStatus={handleToggleStatus} />}
+          {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} />}
           {activeTab === '提现管理' && <WithdrawalTable act={act} />}
           {activeTab === '系统开关' && !switchTab && <SystemSwitchList switches={switches} onToggle={toggleSwitch} onEnter={key => setSwitchTab(key)} />}
           {activeTab === '系统开关' && switchTab && targetGroup && <SystemSwitchDetail group={targetGroup} onToggle={toggleSwitch} onBack={() => setSwitchTab(null)} />}
@@ -1993,9 +1989,9 @@ function WithdrawalTable({ act }) {
   );
 }
 
-function TestAccountTable({ accounts, onToggleStatus }) {
+function TestAccountTable({ accounts }) {
   const now = new Date().toISOString();
-  const effStatus = (a) => (a.cancelTime < now) ? '已注销' : (a.status || '启用');
+  const effStatus = (a) => (a.cancelTime < now) ? '已注销' : '已创建';
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const total = accounts.length;
@@ -2023,14 +2019,9 @@ function TestAccountTable({ accounts, onToggleStatus }) {
             {paged.map((item, i) => (
               <tr key={item.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{i + 1}</td>
-                <td style={{ textAlign: 'center', padding: '10px 12px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-                  <a style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>编辑</a>
+                <td style={{ textAlign: 'center', padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                  <a style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13, marginRight: 8 }}>编辑</a>
                   <a onClick={() => copyToClipboard(item.phone)} style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>复制</a>
-                  {effStatus(item) !== '已注销' && (
-                    <a onClick={() => onToggleStatus(item.id)} style={{ color: effStatus(item) === '禁用' ? '#52c41a' : '#faad14', cursor: 'pointer', fontSize: 13 }}>{effStatus(item) === '禁用' ? '启用' : '禁用'}</a>
-                  )}
-                  </div>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', color: '#1890ff' }}>{item.id}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.phone}</td>
@@ -2043,7 +2034,7 @@ function TestAccountTable({ accounts, onToggleStatus }) {
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.regTime}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.cancelTime || '-'}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>
-                  <span style={effStatus(item) === '已注销' ? {color:'#999',background:'#f5f5f5',padding:'2px 8px',borderRadius:3,fontSize:12} : effStatus(item) === '禁用' ? {color:'#faad14',background:'#fffbe6',padding:'2px 8px',borderRadius:3,fontSize:12} : {color:'#52c41a',background:'#f6ffed',padding:'2px 8px',borderRadius:3,fontSize:12}}>{effStatus(item)}</span>
+                  <span style={effStatus(item) === '已创建' ? {color:'#52c41a',background:'#f6ffed',padding:'2px 8px',borderRadius:3,fontSize:12} : {color:'#999',background:'#f5f5f5',padding:'2px 8px',borderRadius:3,fontSize:12}}>{effStatus(item)}</span>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.createBy}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.remark || '-'}</td>
