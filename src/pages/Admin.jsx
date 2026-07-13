@@ -267,22 +267,43 @@ export default function Admin() {
 
   // 测试账号管理
   const [testAccounts, setTestAccounts] = useState([
-    { id:100001, phone:'13704332181', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test1', realName:'已实名', alipay:'已验证', status:'启用', regTime:'2026-06-01 10:30:00', expireStart:'2026-06-01 10:30:00', expireEnd:'2026-06-08 10:30:00', cancelTime:'', cancelProof:'未上传' },
-    { id:100002, phone:'18960013389', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test2', realName:'未实名', alipay:'未验证', status:'启用', regTime:'2026-06-15 14:20:00', expireStart:'2026-06-15 14:20:00', expireEnd:'2026-09-20 14:20:00', cancelTime:'', cancelProof:'未上传' },
-    { id:100003, phone:'13183863794', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test3', realName:'已实名', alipay:'已验证', status:'禁用', regTime:'2026-05-20 09:00:00', expireStart:'2026-05-20 09:00:00', expireEnd:'2026-06-25 09:00:00', cancelTime:'', cancelProof:'未上传' },
-    { id:100004, phone:'13026542351', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test4', realName:'已实名', alipay:'已验证', status:'启用', regTime:'2026-07-01 16:45:00', expireStart:'2026-07-01 16:45:00', expireEnd:'', cancelTime:'', cancelProof:'未上传' },
-    { id:100005, phone:'13561559407', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test5', realName:'未实名', alipay:'已验证', status:'已注销', regTime:'2026-04-10 11:30:00', expireStart:'2026-04-10 11:30:00', expireEnd:'2026-04-20 11:30:00', cancelTime:'2026-07-05 08:00:00', cancelProof:'已上传' },
-    { id:100006, phone:'18616184959', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test6', realName:'已实名', alipay:'未验证', status:'启用', regTime:'2026-07-08 09:15:00', expireStart:'2026-07-08 09:15:00', expireEnd:'2026-09-10 09:15:00', cancelTime:'', cancelProof:'未上传' },
-    { id:100007, phone:'15210341316', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test7', realName:'已实名', alipay:'已验证', status:'禁用', regTime:'2026-07-12 14:30:00', expireStart:'2026-07-12 14:30:00', expireEnd:'2026-07-01 14:30:00', cancelTime:'', cancelProof:'未上传' },
-    { id:100008, phone:'15875255341', avatar:'https://api.dicebear.com/7.x/avataaars/svg?seed=test8', realName:'未实名', alipay:'未验证', status:'启用', regTime:'2026-07-13 09:00:00', expireStart:'2026-07-13 09:00:00', expireEnd:'', cancelTime:'', cancelProof:'未上传' },
+    { id:100001, phone:'13704332181', realName:'已实名', alipay:'已验证', regTime:'2026-06-01 10:30:00', cancelTime:'', createBy:'邓辉', remark:'三角洲测试' },
+    { id:100002, phone:'18960013389', realName:'未实名', alipay:'未验证', regTime:'2026-06-15 14:20:00', cancelTime:'', createBy:'邓辉', remark:'' },
+    { id:100003, phone:'13183863794', realName:'已实名', alipay:'已验证', regTime:'2026-05-20 09:00:00', cancelTime:'2026-07-05 08:00:00', createBy:'王永祁', remark:'已注销' },
+    { id:100004, phone:'13026542351', realName:'已实名', alipay:'已验证', regTime:'2026-07-01 16:45:00', cancelTime:'', createBy:'系统', remark:'永久有效' },
+    { id:100005, phone:'13561559407', realName:'未实名', alipay:'已验证', regTime:'2026-04-10 11:30:00', cancelTime:'', createBy:'邓辉', remark:'' },
+    { id:100006, phone:'18616184959', realName:'已实名', alipay:'未验证', regTime:'2026-07-08 09:15:00', cancelTime:'', createBy:'邓辉', remark:'特殊账号' },
+    { id:100007, phone:'15210341316', realName:'已实名', alipay:'已验证', regTime:'2026-07-12 14:30:00', cancelTime:'', createBy:'顾修鸣', remark:'' },
+    { id:100009, phone:'13304332181', realName:'未实名', alipay:'已验证', regTime:'2024-02-07 07:32:38', cancelTime:'2025-04-23 00:00:00', createBy:'admin', remark:'已注销' },
+    { id:100010, phone:'13779402654', realName:'已实名', alipay:'已验证', regTime:'2025-02-03 12:06:22', cancelTime:'', createBy:'admin', remark:'特殊账号' },
+    { id:100011, phone:'13178161849', realName:'已实名', alipay:'未验证', regTime:'2024-12-03 01:42:14', cancelTime:'', createBy:'邓辉', remark:'三角洲测试' },
+    { id:100012, phone:'13364752553', realName:'已实名', alipay:'未验证', regTime:'2026-11-03 19:40:10', cancelTime:'', createBy:'王永祁', remark:'' },
+    { id:100013, phone:'15564835030', realName:'已实名', alipay:'已验证', regTime:'2025-02-07 18:56:45', cancelTime:'', createBy:'系统', remark:'已注销' },
+    { id:100014, phone:'15524238849', realName:'未实名', alipay:'未验证', regTime:'2025-06-08 04:32:31', cancelTime:'2026-01-28 00:00:00', createBy:'邓辉', remark:'' },
+    { id:100015, phone:'13569166978', realName:'已实名', alipay:'未验证', regTime:'2024-11-24 03:43:56', cancelTime:'', createBy:'顾修鸣', remark:'新建' },
+    { id:100016, phone:'15014627048', realName:'已实名', alipay:'未验证', regTime:'2024-11-10 20:32:38', cancelTime:'', createBy:'顾修鸣', remark:'' },
+    { id:100017, phone:'15880957015', realName:'已实名', alipay:'已验证', regTime:'2024-04-19 02:05:46', cancelTime:'', createBy:'邓辉', remark:'' },
+    { id:100018, phone:'13427824896', realName:'已实名', alipay:'未验证', regTime:'2026-12-07 22:19:25', cancelTime:'', createBy:'顾修鸣', remark:'永久有效' },
+    { id:100019, phone:'15771331509', realName:'已实名', alipay:'未验证', regTime:'2024-01-03 22:40:03', cancelTime:'', createBy:'邓辉', remark:'短期' },
+    { id:100020, phone:'13283473829', realName:'未实名', alipay:'已验证', regTime:'2025-07-07 03:06:42', cancelTime:'', createBy:'系统', remark:'已注销' },
+    { id:100021, phone:'15501065133', realName:'已实名', alipay:'未验证', regTime:'2025-03-14 05:17:29', cancelTime:'', createBy:'邓辉', remark:'永久有效' },
+    { id:100022, phone:'15810801326', realName:'未实名', alipay:'已验证', regTime:'2024-07-02 05:24:00', cancelTime:'', createBy:'顾修鸣', remark:'永久有效' },
+    { id:100023, phone:'13968723430', realName:'已实名', alipay:'未验证', regTime:'2025-01-02 18:30:32', cancelTime:'', createBy:'admin', remark:'' },
+    { id:100024, phone:'13181219136', realName:'已实名', alipay:'未验证', regTime:'2024-10-20 01:39:05', cancelTime:'', createBy:'admin', remark:'会员测试' },
+    { id:100025, phone:'15754353462', realName:'已实名', alipay:'已验证', regTime:'2025-02-01 14:39:36', cancelTime:'', createBy:'邓辉', remark:'' },
+    { id:100026, phone:'13684251354', realName:'已实名', alipay:'已验证', regTime:'2026-12-10 19:51:41', cancelTime:'', createBy:'admin', remark:'特殊账号' },
+    { id:100027, phone:'13324118244', realName:'已实名', alipay:'未验证', regTime:'2025-04-22 20:54:16', cancelTime:'', createBy:'顾修鸣', remark:'' },
+    { id:100028, phone:'13264005242', realName:'未实名', alipay:'未验证', regTime:'2026-07-18 00:07:04', cancelTime:'', createBy:'王永祁', remark:'' },
+    { id:100029, phone:'13159826204', realName:'已实名', alipay:'已验证', regTime:'2025-04-22 07:42:06', cancelTime:'', createBy:'admin', remark:'已注销' },
+    { id:100030, phone:'13432260256', realName:'已实名', alipay:'已验证', regTime:'2024-12-04 12:55:02', cancelTime:'', createBy:'王永祁', remark:'三角洲测试' },
+    { id:100008, phone:'15875255341', realName:'未实名', alipay:'未验证', regTime:'2026-07-13 09:00:00', cancelTime:'', createBy:'邓辉', remark:'短期测试' },
   ]);
-  const [testAccFilters, setTestAccFilters] = useState({ userId: '', phone: '', status: '', timeStart: '', timeEnd: '' });
+  const [testAccFilters, setTestAccFilters] = useState({ userId: '', phone: '', timeStart: '', timeEnd: '' });
   const [showTestAccModal, setShowTestAccModal] = useState(false);
-  const [testAccForm, setTestAccForm] = useState({ validDays: '7', status: '禁用' });
+  const [testAccForm, setTestAccForm] = useState({ validDays: '7', remark: '' });
   const testAccIdCounter = useRef(100008);
   const getRandomAvatar = () => `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random().toString(36).slice(2)}`;
   const genUserId = () => { testAccIdCounter.current += 1; return testAccIdCounter.current; };
-  // 生成不重复的随机手机号
   const genPhone = () => {
     const prefixes = ['130','131','132','133','134','135','136','137','138','139','150','151','152','153','155','156','157','158','159','170','171','176','177','178','180','181','182','183','184','185','186','187','188','189'];
     const used = testAccounts.map(a => a.phone);
@@ -295,42 +316,26 @@ export default function Admin() {
     const now = new Date();
     const pad = n => String(n).padStart(2, '0');
     const regTime = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    const expireEnd = testAccForm.validDays === '永久' ? null : new Date(now.getTime() + parseInt(testAccForm.validDays) * 86400000);
-    const expireEndStr = expireEnd ? `${expireEnd.getFullYear()}-${pad(expireEnd.getMonth()+1)}-${pad(expireEnd.getDate())} ${pad(expireEnd.getHours())}:${pad(expireEnd.getMinutes())}:${pad(expireEnd.getSeconds())}` : '';
+    const validDays = parseInt(testAccForm.validDays);
+    const expireDate = new Date(now.getTime() + validDays * 86400000);
+    const cancelTime = `${expireDate.getFullYear()}-${pad(expireDate.getMonth()+1)}-${pad(expireDate.getDate())} 00:00:00`;
     const newAcc = {
       id: genUserId(),
       phone: genPhone(),
-      avatar: getRandomAvatar(),
       realName: Math.random() > 0.5 ? '已实名' : '未实名',
       alipay: Math.random() > 0.5 ? '已验证' : '未验证',
-      status: testAccForm.status,
       regTime,
-      expireStart: regTime,
-      expireEnd: expireEndStr,
-      cancelTime: '',
-      cancelProof: '未上传'
+      cancelTime,
+      createBy: '邓辉',
+      remark: testAccForm.remark,
     };
     setTestAccounts([newAcc, ...testAccounts]);
     setShowTestAccModal(false);
   };
 
-  const handleTestAccDisable = (id) => {
-    setTestAccounts(testAccounts.map(a => a.id === id ? {...a, status: a.status === '启用' ? '禁用' : '启用'} : a));
-  };
-  const handleTestAccCancel = (id) => {
-    const account = testAccounts.find(a => a.id === id);
-    if (account?.status === '已注销') return;
-    if (!confirm('确认注销该测试账号？')) return;
-    const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const cancelTime = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    setTestAccounts(testAccounts.map(a => a.id === id ? {...a, status: '已注销', cancelTime, cancelProof: `注销凭证-${id}`} : a));
-  };
-
   const filteredTestAccounts = testAccounts.filter(a => {
     if (testAccFilters.userId && !String(a.id).includes(testAccFilters.userId)) return false;
     if (testAccFilters.phone && !a.phone.includes(testAccFilters.phone)) return false;
-    if (testAccFilters.status && a.status !== testAccFilters.status) return false;
     if (testAccFilters.timeStart && a.regTime < testAccFilters.timeStart) return false;
     if (testAccFilters.timeEnd && a.regTime > testAccFilters.timeEnd + ' 23:59:59') return false;
     return true;
@@ -816,12 +821,6 @@ export default function Admin() {
               <input value={testAccFilters.userId} onChange={e => setTestAccFilters({...testAccFilters, userId: e.target.value})} placeholder="用户ID" style={{ width: 150, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 13, color: '#666', minWidth: 56, textAlign: 'right' }}>状态</span>
-              <select value={testAccFilters.status} onChange={e => setTestAccFilters({...testAccFilters, status: e.target.value})} style={{ width: 150, height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
-                <option value="">请选择状态</option><option value="启用">启用</option><option value="禁用">禁用</option><option value="已过期">已过期</option><option value="已注销">已注销</option>
-              </select>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 13, color: '#666', minWidth: 56, textAlign: 'right' }}>注册时间</span>
               <input value={testAccFilters.timeStart} onChange={e => setTestAccFilters({...testAccFilters, timeStart: e.target.value})} placeholder="开始日期" style={{ width: 130, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
               <span style={{ color: '#999' }}>~</span>
@@ -933,11 +932,7 @@ export default function Admin() {
           {activeTab === '订单列表' && showOrderDetail && orderDetail && <OrderDetailPage order={orderDetail} onBack={() => setShowOrderDetail(false)} />}
           {activeTab === '商品审核' && <Placeholder text="商品审核" />}
           {activeTab === '用户列表' && <UserTable filters={userFilters} />}
-          {activeTab === '测试账号管理' && <TestAccountTable
-            accounts={filteredTestAccounts}
-            onDisable={handleTestAccDisable}
-            onCancel={handleTestAccCancel}
-          />}
+          {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} />}
           {activeTab === '提现管理' && <WithdrawalTable act={act} />}
           {activeTab === '系统开关' && !switchTab && <SystemSwitchList switches={switches} onToggle={toggleSwitch} onEnter={key => setSwitchTab(key)} />}
           {activeTab === '系统开关' && switchTab && targetGroup && <SystemSwitchDetail group={targetGroup} onToggle={toggleSwitch} onBack={() => setSwitchTab(null)} />}
@@ -1204,22 +1199,16 @@ export default function Admin() {
               <button onClick={() => setShowTestAccModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16, color: '#999' }}>✕</button>
             </div>
             <div style={{ padding: '24px' }}>
-              <div style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>系统将自动生成用户ID与手机号</div>
+              <div style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>系统将自动生成用户ID与手机号，申请成功后可通过复制功能快速获取手机号</div>
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-                <span style={{ width: 80, fontSize: 14, color: '#333', flexShrink: 0 }}>有效期</span>
+                <span style={{ width: 80, fontSize: 14, color: '#333', flexShrink: 0 }}>自动注销时间</span>
                 <select value={testAccForm.validDays} onChange={e => setTestAccForm({...testAccForm, validDays: e.target.value})} style={{ flex: 1, height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
-                  {['1','3','7','14','30','永久'].map(d => <option key={d} value={d}>{d}</option>)}
+                  {['1','3','7','14','30'].map(d => <option key={d} value={d}>{d}天</option>)}
                 </select>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <span style={{ width: 80, fontSize: 14, color: '#333', flexShrink: 0 }}>状态</span>
-                <div style={{ display: 'flex', gap: 16 }}>
-                  {['启用','禁用'].map(s => (
-                    <label key={s} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 14, cursor: 'pointer' }}>
-                      <input type="radio" name="testAccStatus" value={s} checked={testAccForm.status === s} onChange={e => setTestAccForm({...testAccForm, status: e.target.value})} /> {s}
-                    </label>
-                  ))}
-                </div>
+              <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                <span style={{ width: 80, fontSize: 14, color: '#333', flexShrink: 0, marginTop: 6 }}>备注</span>
+                <textarea value={testAccForm.remark} onChange={e => setTestAccForm({...testAccForm, remark: e.target.value})} placeholder="请填写备注（选填）" maxLength={100} style={{ flex: 1, height: 60, padding: '6px 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, resize: 'vertical' }} />
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 16px', borderTop: '1px solid #f0f0f0', background: '#fafafa' }}>
@@ -1998,18 +1987,13 @@ function WithdrawalTable({ act }) {
   );
 }
 
-function TestAccountTable({ accounts, onDisable, onCancel }) {
+function TestAccountTable({ accounts }) {
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const total = accounts.length;
   const totalPages = Math.ceil(total / pageSize);
   const paged = accounts.slice((page - 1) * pageSize, page * pageSize);
-  const now = new Date().toISOString();
-  const effStatus = (a) => {
-    if (a.status === '已注销') return '已注销';
-    if (a.expireEnd && a.expireEnd < now) return '已过期';
-    return a.status;
-  };
+  const copyToClipboard = (text) => { navigator.clipboard.writeText(text) };
   return (
     <div style={{ background: '#fff', borderRadius: 2, overflow: 'hidden' }}>
       {accounts.length === 0 ? (
@@ -2022,54 +2006,33 @@ function TestAccountTable({ accounts, onDisable, onCancel }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: '#fafafa' }}>
-              {['序号','操作','用户ID','手机号','头像','是否实名','是否支付宝验证','用户状态','有效期','注销时间','注销凭证'].map(h => (
+              {['序号','操作','ID','手机号','实名','支付宝','创建时间','创建人','备注'].map(h => (
                 <th key={h} style={{ textAlign: 'center', padding: '10px 12px', fontWeight: 600, color: '#333', borderBottom: '1px solid #f0f0f0', whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {paged.map((item, i) => (
-              <tr key={item.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? (effStatus(item) === '已过期' ? '#fafafa' : '#fff') : (effStatus(item) === '已过期' ? '#f5f5f5' : '#fafafa'), opacity: effStatus(item) === '已过期' ? 0.7 : 1 }}>
+              <tr key={item.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{i + 1}</td>
-                <td style={{ textAlign: 'center', padding: '10px 12px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-                  {effStatus(item) !== '已注销' && effStatus(item) !== '已过期' && (
-                    <button onClick={() => onDisable(item.id)} style={{ border: 'none', background: 'none', color: item.status === '禁用' ? '#52c41a' : '#faad14', cursor: 'pointer', fontSize: 13 }}>
-                      {item.status === '禁用' ? '启用' : '禁用'}
-                    </button>
-                  )}
-                  {effStatus(item) !== '已注销' && effStatus(item) !== '已过期' ? (
-                    <button onClick={() => onCancel(item.id)} style={{ border: 'none', background: 'none', color: item.status === '已注销' ? '#bbb' : '#ff4d4f', cursor: 'pointer', fontSize: 13 }}>
-                      {item.status === '已注销' ? '已注销' : '注销'}
-                    </button>
-                  ) : (
-                    <span style={{ fontSize: 12, color: '#bbb' }}>-</span>
-                  )}
-                  </div>
+                <td style={{ textAlign: 'center', padding: '10px 12px', whiteSpace: 'nowrap' }}>
+                  <a style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13, marginRight: 8 }}>编辑</a>
+                  <a onClick={() => copyToClipboard(item.phone)} style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>复制</a>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', color: '#1890ff' }}>{item.id}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.phone}</td>
-                <td style={{ textAlign: 'center', padding: '10px 12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <img src={item.avatar} alt="头像" style={{ width: 32, height: 32, borderRadius: '50%', background: '#f0f0f0' }} />
-                  </div>
-                </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>
                   <span style={{ color: item.realName === '已实名' ? '#52c41a' : '#999' }}>{item.realName}</span>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>
                   <span style={{ color: item.alipay === '已验证' ? '#52c41a' : '#999' }}>{item.alipay}</span>
                 </td>
-                <td style={{ textAlign: 'center', padding: '10px 12px' }}>
-                  <span style={{
-                    color: effStatus(item) === '启用' ? '#52c41a' : effStatus(item) === '禁用' ? '#faad14' : '#999',
-                    background: effStatus(item) === '启用' ? '#f6ffed' : effStatus(item) === '禁用' ? '#fffbe6' : '#f5f5f5',
-                    padding: '2px 8px', borderRadius: 3, fontSize: 12
-                  }}>{effStatus(item)}</span>
+                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>
+                  <div>{item.regTime}</div>
+                  {item.cancelTime && <div style={{ color: '#999', fontSize: 11, marginTop: 2 }}>注销: {item.cancelTime}</div>}
                 </td>
-                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 11, color: item.expireEnd ? '#666' : '#1890ff' }}>{item.expireEnd ? `${item.expireStart?.slice(0,10)} ~ ${item.expireEnd?.slice(0,10)}` : '永久'}</td>
-                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.cancelTime || '-'}</td>
-                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12 }}>{item.cancelProof}</td>
+                <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.createBy}</td>
+                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.remark || '-'}</td>
               </tr>
             ))}
           </tbody>
