@@ -381,8 +381,12 @@ export default function Admin() {
     if (filters.status && filters.status !== '全部商品') p.set('status', filters.status);
     try {
       const r = await fetch(`/mock-api/admin/products?${p}`, { headers: h() });
+      if (!r.ok) throw new Error();
       setData(await r.json());
-    } catch(e) {}
+    } catch(e) {
+      // GitHub Pages 无后端，使用 mock 数据
+      setData({ list: MOCK_GOODS, total: MOCK_GOODS.length });
+    }
     setLoading(false);
   };
 
