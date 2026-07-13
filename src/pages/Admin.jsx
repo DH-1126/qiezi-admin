@@ -267,36 +267,36 @@ export default function Admin() {
 
   // 测试账号管理
   const [testAccounts, setTestAccounts] = useState([
-    { id:100001, phone:'13704332181', realName:'已实名', alipay:'已验证', regTime:'2026-06-01 10:30:00', cancelTime:'2026-06-08 00:00:00', createBy:'邓辉', remark:'三角洲测试' },
-    { id:100002, phone:'18960013389', realName:'未实名', alipay:'未验证', regTime:'2026-06-15 14:20:00', cancelTime:'2026-06-22 00:00:00', createBy:'邓辉', remark:'' },
-    { id:100003, phone:'13183863794', realName:'已实名', alipay:'已验证', regTime:'2026-05-20 09:00:00', cancelTime:'2026-07-05 08:00:00', createBy:'王永祁', remark:'已注销' },
-    { id:100004, phone:'13026542351', realName:'已实名', alipay:'已验证', regTime:'2026-07-01 16:45:00', cancelTime:'2026-07-04 00:00:00', createBy:'系统', remark:'永久有效' },
-    { id:100005, phone:'13561559407', realName:'未实名', alipay:'已验证', regTime:'2026-04-10 11:30:00', cancelTime:'2026-04-24 00:00:00', createBy:'邓辉', remark:'' },
-    { id:100006, phone:'18616184959', realName:'已实名', alipay:'未验证', regTime:'2026-07-08 09:15:00', cancelTime:'2026-07-11 00:00:00', createBy:'邓辉', remark:'特殊账号' },
-    { id:100007, phone:'15210341316', realName:'已实名', alipay:'已验证', regTime:'2026-07-12 14:30:00', cancelTime:'2026-07-15 00:00:00', createBy:'顾修鸣', remark:'' },
-    { id:100009, phone:'13304332181', realName:'未实名', alipay:'已验证', regTime:'2024-02-07 07:32:38', cancelTime:'2025-04-23 00:00:00', createBy:'admin', remark:'已注销' },
-    { id:100010, phone:'13779402654', realName:'已实名', alipay:'已验证', regTime:'2025-02-03 12:06:22', cancelTime:'2025-02-06 00:00:00', createBy:'admin', remark:'特殊账号' },
-    { id:100011, phone:'13178161849', realName:'已实名', alipay:'未验证', regTime:'2024-12-03 01:42:14', cancelTime:'2024-12-06 00:00:00', createBy:'邓辉', remark:'三角洲测试' },
-    { id:100012, phone:'13364752553', realName:'已实名', alipay:'未验证', regTime:'2026-11-03 19:40:10', cancelTime:'2026-12-03 00:00:00', createBy:'王永祁', remark:'' },
-    { id:100013, phone:'15564835030', realName:'已实名', alipay:'已验证', regTime:'2025-02-07 18:56:45', cancelTime:'2025-02-08 00:00:00', createBy:'系统', remark:'已注销' },
-    { id:100014, phone:'15524238849', realName:'未实名', alipay:'未验证', regTime:'2025-06-08 04:32:31', cancelTime:'2026-01-28 00:00:00', createBy:'邓辉', remark:'' },
-    { id:100015, phone:'13569166978', realName:'已实名', alipay:'未验证', regTime:'2024-11-24 03:43:56', cancelTime:'2024-12-01 00:00:00', createBy:'顾修鸣', remark:'新建' },
-    { id:100016, phone:'15014627048', realName:'已实名', alipay:'未验证', regTime:'2024-11-10 20:32:38', cancelTime:'2024-11-24 00:00:00', createBy:'顾修鸣', remark:'' },
-    { id:100017, phone:'15880957015', realName:'已实名', alipay:'已验证', regTime:'2024-04-19 02:05:46', cancelTime:'2024-04-26 00:00:00', createBy:'邓辉', remark:'' },
-    { id:100018, phone:'13427824896', realName:'已实名', alipay:'未验证', regTime:'2026-12-07 22:19:25', cancelTime:'2026-12-21 00:00:00', createBy:'顾修鸣', remark:'永久有效' },
-    { id:100019, phone:'15771331509', realName:'已实名', alipay:'未验证', regTime:'2024-01-03 22:40:03', cancelTime:'2024-01-17 00:00:00', createBy:'邓辉', remark:'短期' },
-    { id:100020, phone:'13283473829', realName:'未实名', alipay:'已验证', regTime:'2025-07-07 03:06:42', cancelTime:'2025-07-21 00:00:00', createBy:'系统', remark:'已注销' },
-    { id:100021, phone:'15501065133', realName:'已实名', alipay:'未验证', regTime:'2025-03-14 05:17:29', cancelTime:'2025-03-28 00:00:00', createBy:'邓辉', remark:'永久有效' },
-    { id:100022, phone:'15810801326', realName:'未实名', alipay:'已验证', regTime:'2024-07-02 05:24:00', cancelTime:'2024-07-03 00:00:00', createBy:'顾修鸣', remark:'永久有效' },
-    { id:100023, phone:'13968723430', realName:'已实名', alipay:'未验证', regTime:'2025-01-02 18:30:32', cancelTime:'2025-01-16 00:00:00', createBy:'admin', remark:'' },
-    { id:100024, phone:'13181219136', realName:'已实名', alipay:'未验证', regTime:'2024-10-20 01:39:05', cancelTime:'2024-10-27 00:00:00', createBy:'admin', remark:'会员测试' },
-    { id:100025, phone:'15754353462', realName:'已实名', alipay:'已验证', regTime:'2025-02-01 14:39:36', cancelTime:'2025-02-04 00:00:00', createBy:'邓辉', remark:'' },
-    { id:100026, phone:'13684251354', realName:'已实名', alipay:'已验证', regTime:'2026-12-10 19:51:41', cancelTime:'2026-12-17 00:00:00', createBy:'admin', remark:'特殊账号' },
-    { id:100027, phone:'13324118244', realName:'已实名', alipay:'未验证', regTime:'2025-04-22 20:54:16', cancelTime:'2025-05-06 00:00:00', createBy:'顾修鸣', remark:'' },
-    { id:100028, phone:'13264005242', realName:'未实名', alipay:'未验证', regTime:'2026-07-18 00:07:04', cancelTime:'2026-08-01 00:00:00', createBy:'王永祁', remark:'' },
-    { id:100029, phone:'13159826204', realName:'已实名', alipay:'已验证', regTime:'2025-04-22 07:42:06', cancelTime:'2025-05-06 00:00:00', createBy:'admin', remark:'已注销' },
-    { id:100030, phone:'13432260256', realName:'已实名', alipay:'已验证', regTime:'2024-12-04 12:55:02', cancelTime:'2024-12-07 00:00:00', createBy:'王永祁', remark:'三角洲测试' },
-    { id:100008, phone:'15875255341', realName:'未实名', alipay:'未验证', regTime:'2026-07-13 09:00:00', cancelTime:'2026-08-12 00:00:00', createBy:'邓辉', remark:'短期测试' },
+    { id:100001, phone:'13704332181', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2026-06-01 10:30:00', cancelTime:'2026-06-08 00:00:00', createBy:'邓辉', remark:'三角洲测试' },
+    { id:100002, phone:'18960013389', status:'启用', realName:'未实名', alipay:'未验证', regTime:'2026-06-15 14:20:00', cancelTime:'2026-06-22 00:00:00', createBy:'邓辉', remark:'' },
+    { id:100003, phone:'13183863794', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2026-05-20 09:00:00', cancelTime:'2026-07-05 08:00:00', createBy:'王永祁', remark:'已注销' },
+    { id:100004, phone:'13026542351', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2026-07-01 16:45:00', cancelTime:'2026-07-04 00:00:00', createBy:'系统', remark:'永久有效' },
+    { id:100005, phone:'13561559407', status:'启用', realName:'未实名', alipay:'已验证', regTime:'2026-04-10 11:30:00', cancelTime:'2026-04-24 00:00:00', createBy:'邓辉', remark:'' },
+    { id:100006, phone:'18616184959', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2026-07-08 09:15:00', cancelTime:'2026-07-11 00:00:00', createBy:'邓辉', remark:'特殊账号' },
+    { id:100007, phone:'15210341316', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2026-07-12 14:30:00', cancelTime:'2026-07-15 00:00:00', createBy:'顾修鸣', remark:'' },
+    { id:100009, phone:'13304332181', status:'启用', realName:'未实名', alipay:'已验证', regTime:'2024-02-07 07:32:38', cancelTime:'2025-04-23 00:00:00', createBy:'admin', remark:'已注销' },
+    { id:100010, phone:'13779402654', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2025-02-03 12:06:22', cancelTime:'2025-02-06 00:00:00', createBy:'admin', remark:'特殊账号' },
+    { id:100011, phone:'13178161849', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2024-12-03 01:42:14', cancelTime:'2024-12-06 00:00:00', createBy:'邓辉', remark:'三角洲测试' },
+    { id:100012, phone:'13364752553', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2026-11-03 19:40:10', cancelTime:'2026-12-03 00:00:00', createBy:'王永祁', remark:'' },
+    { id:100013, phone:'15564835030', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2025-02-07 18:56:45', cancelTime:'2025-02-08 00:00:00', createBy:'系统', remark:'已注销' },
+    { id:100014, phone:'15524238849', status:'启用', realName:'未实名', alipay:'未验证', regTime:'2025-06-08 04:32:31', cancelTime:'2026-01-28 00:00:00', createBy:'邓辉', remark:'' },
+    { id:100015, phone:'13569166978', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2024-11-24 03:43:56', cancelTime:'2024-12-01 00:00:00', createBy:'顾修鸣', remark:'新建' },
+    { id:100016, phone:'15014627048', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2024-11-10 20:32:38', cancelTime:'2024-11-24 00:00:00', createBy:'顾修鸣', remark:'' },
+    { id:100017, phone:'15880957015', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2024-04-19 02:05:46', cancelTime:'2024-04-26 00:00:00', createBy:'邓辉', remark:'' },
+    { id:100018, phone:'13427824896', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2026-12-07 22:19:25', cancelTime:'2026-12-21 00:00:00', createBy:'顾修鸣', remark:'永久有效' },
+    { id:100019, phone:'15771331509', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2024-01-03 22:40:03', cancelTime:'2024-01-17 00:00:00', createBy:'邓辉', remark:'短期' },
+    { id:100020, phone:'13283473829', status:'启用', realName:'未实名', alipay:'已验证', regTime:'2025-07-07 03:06:42', cancelTime:'2025-07-21 00:00:00', createBy:'系统', remark:'已注销' },
+    { id:100021, phone:'15501065133', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2025-03-14 05:17:29', cancelTime:'2025-03-28 00:00:00', createBy:'邓辉', remark:'永久有效' },
+    { id:100022, phone:'15810801326', status:'启用', realName:'未实名', alipay:'已验证', regTime:'2024-07-02 05:24:00', cancelTime:'2024-07-03 00:00:00', createBy:'顾修鸣', remark:'永久有效' },
+    { id:100023, phone:'13968723430', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2025-01-02 18:30:32', cancelTime:'2025-01-16 00:00:00', createBy:'admin', remark:'' },
+    { id:100024, phone:'13181219136', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2024-10-20 01:39:05', cancelTime:'2024-10-27 00:00:00', createBy:'admin', remark:'会员测试' },
+    { id:100025, phone:'15754353462', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2025-02-01 14:39:36', cancelTime:'2025-02-04 00:00:00', createBy:'邓辉', remark:'' },
+    { id:100026, phone:'13684251354', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2026-12-10 19:51:41', cancelTime:'2026-12-17 00:00:00', createBy:'admin', remark:'特殊账号' },
+    { id:100027, phone:'13324118244', status:'启用', realName:'已实名', alipay:'未验证', regTime:'2025-04-22 20:54:16', cancelTime:'2025-05-06 00:00:00', createBy:'顾修鸣', remark:'' },
+    { id:100028, phone:'13264005242', status:'启用', realName:'未实名', alipay:'未验证', regTime:'2026-07-18 00:07:04', cancelTime:'2026-08-01 00:00:00', createBy:'王永祁', remark:'' },
+    { id:100029, phone:'13159826204', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2025-04-22 07:42:06', cancelTime:'2025-05-06 00:00:00', createBy:'admin', remark:'已注销' },
+    { id:100030, phone:'13432260256', status:'启用', realName:'已实名', alipay:'已验证', regTime:'2024-12-04 12:55:02', cancelTime:'2024-12-07 00:00:00', createBy:'王永祁', remark:'三角洲测试' },
+    { id:100008, phone:'15875255341', status:'启用', realName:'未实名', alipay:'未验证', regTime:'2026-07-13 09:00:00', cancelTime:'2026-08-12 00:00:00', createBy:'邓辉', remark:'短期测试' },
   ]);
   const [testAccFilters, setTestAccFilters] = useState({ userId: '', phone: '', timeStart: '', timeEnd: '' });
   const [showTestAccModal, setShowTestAccModal] = useState(false);
@@ -324,6 +324,7 @@ export default function Admin() {
       phone: genPhone(),
       realName: Math.random() > 0.5 ? '已实名' : '未实名',
       alipay: Math.random() > 0.5 ? '已验证' : '未验证',
+      status: '启用',
       regTime,
       cancelTime,
       password: 'qq123456',
@@ -334,12 +335,15 @@ export default function Admin() {
     setShowTestAccModal(false);
   };
 
+  const handleToggleStatus = (id) => {
+    setTestAccounts(prev => prev.map(a => a.id === id ? {...a, status: a.status === '启用' ? '禁用' : '启用'} : a));
+  };
+
   const nowISO = new Date().toISOString();
-  const effStatusFilter = (a) => (a.cancelTime < nowISO) ? '已注销' : '已创建';
+  const effStatusFilter = (a) => (a.cancelTime < nowISO) ? '已注销' : (a.status || '启用');
   const filteredTestAccounts = testAccounts.filter(a => {
     if (testAccFilters.phone && !a.phone.includes(testAccFilters.phone)) return false;
-    if (testAccFilters.timeStart && a.regTime < testAccFilters.timeStart) return false;
-    if (testAccFilters.timeEnd && a.regTime > testAccFilters.timeEnd + ' 23:59:59') return false;
+    if (testAccFilters.status && effStatusFilter(a) !== testAccFilters.status) return false;
     return true;
   });
   // 系统开关
@@ -825,7 +829,7 @@ export default function Admin() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 13, color: '#666', minWidth: 56, textAlign: 'right' }}>状态</span>
               <select value={testAccFilters.status} onChange={e => setTestAccFilters({...testAccFilters, status: e.target.value})} style={{ width: 120, height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
-                <option value="">全部</option><option value="已创建">已创建</option><option value="已注销">已注销</option>
+                <option value="">全部</option><option value="启用">启用</option><option value="禁用">禁用</option><option value="已注销">已注销</option>
               </select>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -934,7 +938,7 @@ export default function Admin() {
           {activeTab === '订单列表' && showOrderDetail && orderDetail && <OrderDetailPage order={orderDetail} onBack={() => setShowOrderDetail(false)} />}
           {activeTab === '商品审核' && <Placeholder text="商品审核" />}
           {activeTab === '用户列表' && <UserTable filters={userFilters} />}
-          {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} />}
+          {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} onToggleStatus={handleToggleStatus} />}
           {activeTab === '提现管理' && <WithdrawalTable act={act} />}
           {activeTab === '系统开关' && !switchTab && <SystemSwitchList switches={switches} onToggle={toggleSwitch} onEnter={key => setSwitchTab(key)} />}
           {activeTab === '系统开关' && switchTab && targetGroup && <SystemSwitchDetail group={targetGroup} onToggle={toggleSwitch} onBack={() => setSwitchTab(null)} />}
@@ -1989,9 +1993,9 @@ function WithdrawalTable({ act }) {
   );
 }
 
-function TestAccountTable({ accounts }) {
+function TestAccountTable({ accounts, onToggleStatus }) {
   const now = new Date().toISOString();
-  const effStatus = (a) => (a.cancelTime < now) ? '已注销' : '已创建';
+  const effStatus = (a) => (a.cancelTime < now) ? '已注销' : (a.status || '启用');
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const total = accounts.length;
@@ -2021,7 +2025,10 @@ function TestAccountTable({ accounts }) {
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{i + 1}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', whiteSpace: 'nowrap' }}>
                   <a style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13, marginRight: 8 }}>编辑</a>
-                  <a onClick={() => copyToClipboard(item.phone)} style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>复制</a>
+                  <a onClick={() => copyToClipboard(item.phone)} style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13, marginRight: 8 }}>复制</a>
+                  {effStatus(item) !== '已注销' && (
+                    <a onClick={() => onToggleStatus(item.id)} style={{ color: effStatus(item) === '禁用' ? '#52c41a' : '#faad14', cursor: 'pointer', fontSize: 13 }}>{effStatus(item) === '禁用' ? '启用' : '禁用'}</a>
+                  )}
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', color: '#1890ff' }}>{item.id}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.phone}</td>
@@ -2034,7 +2041,7 @@ function TestAccountTable({ accounts }) {
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.regTime}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.cancelTime || '-'}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>
-                  <span style={effStatus(item) === '已创建' ? {color:'#52c41a',background:'#f6ffed',padding:'2px 8px',borderRadius:3,fontSize:12} : {color:'#999',background:'#f5f5f5',padding:'2px 8px',borderRadius:3,fontSize:12}}>{effStatus(item)}</span>
+                  <span style={effStatus(item) === '已注销' ? {color:'#999',background:'#f5f5f5',padding:'2px 8px',borderRadius:3,fontSize:12} : effStatus(item) === '禁用' ? {color:'#faad14',background:'#fffbe6',padding:'2px 8px',borderRadius:3,fontSize:12} : {color:'#52c41a',background:'#f6ffed',padding:'2px 8px',borderRadius:3,fontSize:12}}>{effStatus(item)}</span>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.createBy}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.remark || '-'}</td>
