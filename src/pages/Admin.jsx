@@ -2023,12 +2023,14 @@ function TestAccountTable({ accounts, onToggleStatus }) {
             {paged.map((item, i) => (
               <tr key={item.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{i + 1}</td>
-                <td style={{ textAlign: 'center', padding: '10px 12px', whiteSpace: 'nowrap' }}>
-                  <a style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13, marginRight: 8 }}>编辑</a>
-                  <a onClick={() => copyToClipboard(item.phone)} style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13, marginRight: 8 }}>复制</a>
+                <td style={{ textAlign: 'center', padding: '10px 12px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+                  <a style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>编辑</a>
+                  <a onClick={() => copyToClipboard(item.phone)} style={{ color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>复制</a>
                   {effStatus(item) !== '已注销' && (
                     <a onClick={() => onToggleStatus(item.id)} style={{ color: effStatus(item) === '禁用' ? '#52c41a' : '#faad14', cursor: 'pointer', fontSize: 13 }}>{effStatus(item) === '禁用' ? '启用' : '禁用'}</a>
                   )}
+                  </div>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', color: '#1890ff' }}>{item.id}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.phone}</td>
