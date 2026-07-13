@@ -2009,7 +2009,7 @@ function TestAccountTable({ accounts }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: '#fafafa' }}>
-              {['序号','操作','ID','手机号','实名','支付宝','创建时间','创建人','备注'].map(h => (
+              {['序号','操作','ID','手机号','实名','支付宝','创建时间','注销时间','状态','创建人','备注'].map(h => (
                 <th key={h} style={{ textAlign: 'center', padding: '10px 12px', fontWeight: 600, color: '#333', borderBottom: '1px solid #f0f0f0', whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
@@ -2030,9 +2030,10 @@ function TestAccountTable({ accounts }) {
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>
                   <span style={{ color: item.alipay === '已验证' ? '#52c41a' : '#999' }}>{item.alipay}</span>
                 </td>
-                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>
-                  <div>{item.regTime}</div>
-                  {item.cancelTime && <div style={{ color: '#999', fontSize: 11, marginTop: 2 }}>注销: {item.cancelTime}</div>}
+                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.regTime}</td>
+                <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.cancelTime || '-'}</td>
+                <td style={{ textAlign: 'center', padding: '10px 12px' }}>
+                  <span style={effStatus(item) === '已创建' ? {color:'#52c41a',background:'#f6ffed',padding:'2px 8px',borderRadius:3,fontSize:12} : {color:'#999',background:'#f5f5f5',padding:'2px 8px',borderRadius:3,fontSize:12}}>{effStatus(item)}</span>
                 </td>
                 <td style={{ textAlign: 'center', padding: '10px 12px' }}>{item.createBy}</td>
                 <td style={{ textAlign: 'center', padding: '10px 12px', fontSize: 12, color: '#666', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.remark || '-'}</td>
