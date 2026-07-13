@@ -326,6 +326,7 @@ export default function Admin() {
       alipay: Math.random() > 0.5 ? '已验证' : '未验证',
       regTime,
       cancelTime,
+      password: 'qq123456',
       createBy: '邓辉',
       remark: testAccForm.remark,
     };
@@ -1200,7 +1201,7 @@ export default function Admin() {
               <button onClick={() => setShowTestAccModal(false)} style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 16, color: '#999' }}>✕</button>
             </div>
             <div style={{ padding: '24px' }}>
-              <div style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>系统将自动生成用户ID与手机号，申请成功后可通过复制功能快速获取手机号</div>
+              <div style={{ fontSize: 13, color: '#999', marginBottom: 16 }}>系统将自动生成用户ID与手机号，默认密码 qq123456，申请成功后可通过复制功能快速获取手机号</div>
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
                 <span style={{ width: 80, fontSize: 14, color: '#333', flexShrink: 0 }}>自动注销时间</span>
                 <select value={testAccForm.validDays} onChange={e => setTestAccForm({...testAccForm, validDays: e.target.value})} style={{ flex: 1, height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
