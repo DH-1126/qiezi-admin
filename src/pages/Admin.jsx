@@ -460,6 +460,7 @@ export default function Admin() {
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: 12, color: '#c9cdd4', margin: '20px 0 0' }}>测试账号 15971444761 · 验证码 123123</p>
+          <p style={{ textAlign: 'center', fontSize: 11, color: '#d9d9d9', margin: '8px 0 0' }}>v1.0.0 · 2026.07.13</p>
         </div>
       </div>
     </div>
