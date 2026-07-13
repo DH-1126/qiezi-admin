@@ -15,7 +15,7 @@ import Admin from './pages/Admin';
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/qiezi-admin">
       <AuthProvider>
         <Routes>
           <Route element={<Layout />}>
