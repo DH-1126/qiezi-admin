@@ -4,6 +4,7 @@ import OrderDetailPage from '../components/admin/OrderDetailPage';
 import OrderShipModal from '../components/admin/OrderShipModal';
 
 const ORDER_STORAGE_KEY = 'qiezi_admin_orders_v2';
+const ADMIN_ACCOUNT_NAME = '邓辉';
 
 function formatAdminDateTime(date = new Date()) {
   const pad = value => String(value).padStart(2, '0');
@@ -190,12 +191,39 @@ const MOCK_ORDERS = [
   { orderNo:'2026070262200', thirdPayNo:'4200003127202607025799922307', productId:'969663071617', thirdProductId:'', shipTime:'', type:'自建商品', title:'登录区服:QQ  总资产：20 M 纯币资产：20 M  角色：不破誓约 电锯惊魂 金牌射手 无题密令 未结卷宗 账密：扫码登录 段位：铂金 安全箱：2x2 靶场等级：4级 账号等级：60 训练中心：6级', phone:'13874237458', upChannel:'official', reportChannel:'xytg', belongChannel:'xytg', server:'扫码登录|QQ', status:'已取消', settleMode:'租期内打完', cost:41.67, rent:45.84, deposit:100, pay:145.84, fee:4.17, buyerPay:145.84, payMethod:'微信JSAPI支付', payChannel:'(207)茄子代售-微信原生支付-公众号模式', buyerRefund:'', sellerSettle:'', createTime:'2026-07-02 12:48:10', updateTime:'2026-07-02 12:51:06', operator:'system' },
 ];
 
+const DEMO_BACKEND_ORDERS = {
+  '2026070264075': { orderChannel:'咸鱼', channelAccountId:'154420045', channelAccountPhone:'18942914433', channelOrderNo:'XY2026070204075', depositOrderNo:'XYDJ2026070204075', buyerName:'咸鱼', buyerId:'154420045', reportChannel:'', belongChannel:ADMIN_ACCOUNT_NAME, payMethod:'渠道订单', payChannel:'咸鱼', operator:ADMIN_ACCOUNT_NAME, backendOrderDataVersion:'v1.14' },
+  '2026070262204': { orderChannel:'咸鱼', channelAccountId:'154420045', channelAccountPhone:'18942914433', channelOrderNo:'XY2026070202204', depositOrderNo:'XYDJ2026070202204', buyerName:'咸鱼', buyerId:'154420045', reportChannel:'', belongChannel:ADMIN_ACCOUNT_NAME, payMethod:'渠道订单', payChannel:'咸鱼', operator:ADMIN_ACCOUNT_NAME, backendOrderDataVersion:'v1.14' },
+};
+
 function normalizeOrders(orders) {
-  return orders.map(order => ({
-    orderChannel: '官方',
-    channelOrderNo: '',
-    ...order,
-  }));
+  return orders.map(order => {
+    const normalized = {
+      orderChannel: '官方',
+      channelAccountId: '',
+      channelAccountPhone: '',
+      channelOrderNo: '',
+      depositOrderNo: '',
+      ...order,
+      ...(DEMO_BACKEND_ORDERS[order.orderNo] || {}),
+    };
+    const isLegacyBackendOrder = !normalized.backendOrderDataVersion
+      && (order.orderChannel === '咸鱼' || order.reportChannel === '后台下单' || order.buyerName === '咸鱼');
+    if (!isLegacyBackendOrder) return normalized;
+    const serial = String(order.orderNo).replace(/\D/g, '').slice(-13);
+    return {
+      ...normalized,
+      orderChannel: '咸鱼',
+      channelAccountId: normalized.channelAccountId || '154420045',
+      channelAccountPhone: normalized.channelAccountPhone || '18942914433',
+      channelOrderNo: normalized.channelOrderNo || `XY${serial}`,
+      depositOrderNo: normalized.depositOrderNo || `XYDJ${serial}`,
+      reportChannel: '',
+      belongChannel: normalized.operator && normalized.operator !== 'system' ? normalized.operator : ADMIN_ACCOUNT_NAME,
+      operator: normalized.operator && normalized.operator !== 'system' ? normalized.operator : ADMIN_ACCOUNT_NAME,
+      backendOrderDataVersion: 'v1.14',
+    };
+  });
 }
 
 function loadOrders() {
@@ -268,7 +296,7 @@ export default function Admin() {
   const [showSortRuleModal, setShowSortRuleModal] = useState(false);
   const [sortRuleForm, setSortRuleForm] = useState({ name:'', code:'', status:'启用' });
   // 订单筛选
-  const [orderFilters, setOrderFilters] = useState({ timeRange:'', payStatus:'', payPlatform:'', orderNo:'', buyerId:'', buyerPhone:'', sellerId:'', sellerPhone:'', title:'', productId:'', channelCode:'', thirdPayNo:'', thirdProductId:'', productType:'', shipTime:'', shipTimeEnd:'' });
+  const [orderFilters, setOrderFilters] = useState({ timeRange:'', payStatus:'', payPlatform:'', orderNo:'', orderChannel:'', channelOrderNo:'', depositOrderNo:'', buyerId:'', buyerPhone:'', sellerId:'', sellerPhone:'', title:'', productId:'', channelCode:'', thirdPayNo:'', thirdProductId:'', productType:'', shipTime:'', shipTimeEnd:'' });
   const [userFilters, setUserFilters] = useState({ keyword:'', status:'', regStart:'', regEnd:'' });
   const [orderTab, setOrderTab] = useState('全部');
   const [orders, setOrders] = useState(loadOrders);
@@ -282,7 +310,7 @@ export default function Admin() {
     localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(orders));
   }, [orders]);
 
-  const handleBackendOrder = ({ product, channel, channelOrderNo }) => {
+  const handleBackendOrder = ({ product, channel, channelAccountId, channelAccountPhone, channelOrderNo, depositOrderNo }) => {
     backendOrderAttemptRef.current += 1;
     if (backendOrderAttemptRef.current % 2 === 1) {
       return { success: false, reason: '渠道订单同步失败，请稍后重试' };
@@ -298,17 +326,20 @@ export default function Admin() {
       thirdProductId: product.thirdProductId || '',
       type: product.productType,
       orderChannel: channel,
+      channelAccountId,
+      channelAccountPhone,
       channelOrderNo,
-      buyerName: '咸鱼',
-      buyerId: '咸鱼',
+      depositOrderNo,
+      buyerName: channel,
+      buyerId: channelAccountId,
       buyerPhone: product.phone,
       sellerId: product.sellerId,
       sellerPhone: product.phone,
       title: product.title,
       phone: product.phone,
       upChannel: product.channel || 'PC',
-      reportChannel: '后台下单',
-      belongChannel: channel,
+      reportChannel: '',
+      belongChannel: ADMIN_ACCOUNT_NAME,
       server: `${product.loginMethod || '扫码登录'}|${product.gameServer}`,
       status: '待发货',
       settleMode: product.settlementMode,
@@ -325,7 +356,8 @@ export default function Admin() {
       createTime: now,
       shipTime: '',
       updateTime: now,
-      operator: '邓辉',
+      operator: ADMIN_ACCOUNT_NAME,
+      backendOrderDataVersion: 'v1.14',
       image: product.image,
       rentDays: product.rentDays || 2,
       productSnapshot: {
@@ -357,7 +389,7 @@ export default function Admin() {
     const shipTime = formatAdminDateTime();
     const updateTime = formatAdminDateTime();
     setOrders(current => current.map(order => order.orderNo === orderNo
-      ? { ...order, status: '租用中', shipTime, rentStartTime: shipTime, operator: '邓辉', updateTime, groupQrCode, groupQrName }
+      ? { ...order, status: '租用中', shipTime, rentStartTime: shipTime, operator: ADMIN_ACCOUNT_NAME, updateTime, groupQrCode, groupQrName }
       : order));
     setShipOrder(null);
     setShipNotice(`订单 ${orderNo} 发货成功`);
@@ -553,7 +585,7 @@ export default function Admin() {
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: 12, color: '#c9cdd4', margin: '20px 0 0' }}>测试账号 15971444761 · 验证码 123123</p>
-          <p style={{ textAlign: 'center', fontSize: 11, color: '#d9d9d9', margin: '8px 0 0' }}>v1.13 · 2026.07.16</p>
+          <p style={{ textAlign: 'center', fontSize: 11, color: '#d9d9d9', margin: '8px 0 0' }}>v1.14 · 2026.07.16</p>
         </div>
       </div>
     </div>
@@ -787,6 +819,21 @@ export default function Admin() {
               <input value={orderFilters.orderNo} onChange={e => setOrderFilters({...orderFilters, orderNo: e.target.value})} placeholder="订单号" style={{ width: 160, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 13, color: '#666', minWidth: 70, textAlign: 'right' }}>下单渠道</span>
+              <select value={orderFilters.orderChannel} onChange={e => setOrderFilters({...orderFilters, orderChannel: e.target.value})} style={{ width: 150, height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
+                <option value="">全部渠道</option>
+                {[...new Set(orders.map(order => order.orderChannel || '官方'))].map(channel => <option key={channel} value={channel}>{channel}</option>)}
+              </select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 13, color: '#666', minWidth: 84, textAlign: 'right' }}>渠道订单号</span>
+              <input value={orderFilters.channelOrderNo} onChange={e => setOrderFilters({...orderFilters, channelOrderNo: e.target.value})} placeholder="渠道订单号" style={{ width: 170, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 13, color: '#666', minWidth: 84, textAlign: 'right' }}>押金订单号</span>
+              <input value={orderFilters.depositOrderNo} onChange={e => setOrderFilters({...orderFilters, depositOrderNo: e.target.value})} placeholder="押金订单号" style={{ width: 170, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 13, color: '#666', minWidth: 70, textAlign: 'right' }}>买家用户ID</span>
               <input value={orderFilters.buyerId} onChange={e => setOrderFilters({...orderFilters, buyerId: e.target.value})} placeholder="买家用户ID" style={{ width: 150, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
             </div>
@@ -831,7 +878,7 @@ export default function Admin() {
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12 }}>
             <button style={{ height: 32, padding: '0 16px', border: 'none', borderRadius: 2, background: '#1890ff', color: '#fff', fontSize: 13, cursor: 'pointer' }}>搜 索</button>
-            <button onClick={() => setOrderFilters({ timeRange:'', payStatus:'', payPlatform:'', orderNo:'', buyerId:'', buyerPhone:'', sellerId:'', sellerPhone:'', title:'', productId:'', channelCode:'', thirdPayNo:'', thirdProductId:'', productType:'', shipTime:'', shipTimeEnd:'' })} style={{ height: 32, padding: '0 16px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', color: '#333', fontSize: 13, cursor: 'pointer' }}>重 置</button>
+            <button onClick={() => setOrderFilters({ timeRange:'', payStatus:'', payPlatform:'', orderNo:'', orderChannel:'', channelOrderNo:'', depositOrderNo:'', buyerId:'', buyerPhone:'', sellerId:'', sellerPhone:'', title:'', productId:'', channelCode:'', thirdPayNo:'', thirdProductId:'', productType:'', shipTime:'', shipTimeEnd:'' })} style={{ height: 32, padding: '0 16px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', color: '#333', fontSize: 13, cursor: 'pointer' }}>重 置</button>
             <button style={{ height: 32, padding: '0 16px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', color: '#333', fontSize: 13, cursor: 'pointer' }}>导 出</button>
           </div>
           </div>
@@ -1774,9 +1821,12 @@ function OrderTable({ orders, orderTab, filters, onDetail, onShip }) {
   const filtered = (orderTab === '全部' ? orders : orders.filter(o => o.status === orderTab)).filter(o => {
     if (filters.shipTime && !o.shipTime) return false;
     if (filters.shipTime && !o.shipTime.includes(filters.shipTime)) return false;
+    if (filters.orderChannel && (o.orderChannel || '官方') !== filters.orderChannel) return false;
+    if (filters.channelOrderNo && !String(o.channelOrderNo || '').toLowerCase().includes(filters.channelOrderNo.trim().toLowerCase())) return false;
+    if (filters.depositOrderNo && !String(o.depositOrderNo || '').toLowerCase().includes(filters.depositOrderNo.trim().toLowerCase())) return false;
     return true;
   });
-  const cols = ['订单号','三方支付流水订单号','商品ID','三方商品ID','商品类型','下单渠道','渠道订单号','商品标题','商家图片','手机号','商品上架渠道','上报渠道','归属渠道','游戏区服','订单状态','结算模式','成本金额(元)','出租金额(元)','押金金额(元)','支付金额(元)','平台抽成(元)','买家实付(元)','支付方式','支付渠道名称','买家实退(元)','卖家结算(元)','创建时间','发货时间','最后操作时间','最后操作人','操作'];
+  const cols = ['订单号','三方支付流水订单号','商品ID','三方商品ID','商品类型','下单渠道','渠道订单号','押金订单号','商品标题','商家图片','手机号','商品上架渠道','上报渠道','归属渠道','游戏区服','订单状态','结算模式','成本金额(元)','出租金额(元)','押金金额(元)','支付金额(元)','平台抽成(元)','买家实付(元)','支付方式','支付渠道名称','买家实退(元)','卖家结算(元)','创建时间','发货时间','最后操作时间','最后操作人','操作'];
   const stickyTh = { position:'sticky',right:0,zIndex:2,background:'#fafafa' };
   const stickyTd = (bg) => ({ position:'sticky',right:0,zIndex:1,background:bg });
   const titleStyle = { display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden',textOverflow:'ellipsis',lineHeight:1.5,maxWidth:220,wordBreak:'break-all' };
@@ -1784,7 +1834,7 @@ function OrderTable({ orders, orderTab, filters, onDetail, onShip }) {
     <div style={{ background: '#fff', borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
       <div style={{ position: 'relative' }}>
         <div style={{ overflow: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 4560 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 4680 }}>
             <thead>
               <tr style={{ background: '#fafafa' }}>
                 {cols.map(h => (
@@ -1803,6 +1853,7 @@ function OrderTable({ orders, orderTab, filters, onDetail, onShip }) {
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.type}</td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.orderChannel || '官方'}</td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.channelOrderNo || ''}</td>
+                  <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.depositOrderNo || ''}</td>
                   <td style={{ padding:'8px',borderRight:'1px solid #f0f0f0' }}><div style={titleStyle} title={item.title}>{item.title}</div></td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0',color:'#1890ff',cursor:'pointer' }}>🖼️</td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.phone}</td>

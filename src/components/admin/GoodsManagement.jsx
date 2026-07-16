@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import './GoodsManagement.css';
 
-const GOODS_STORAGE_KEY = 'qiezi_admin_goods_v4';
-const CHANNEL_ACCOUNT_STORAGE_KEY = 'qiezi_channel_account_v1';
+const GOODS_STORAGE_KEY = 'qiezi_admin_goods_v5';
+const CHANNEL_ACCOUNT_STORAGE_KEY = 'qiezi_channel_accounts_v6';
 const GOODS_IMAGE = `${import.meta.env.BASE_URL}assets/goods-avatar.png`;
 
 const EMPTY_FILTERS = {
@@ -75,11 +75,11 @@ const BASE_GOODS = [
 
 function createGoods() {
   const operators = ['', '詹志威', '王永祁', '顾修鸣'];
-  return Array.from({ length: 25 }, (_, index) => {
+  return Array.from({ length: 30 }, (_, index) => {
     const base = BASE_GOODS[index % BASE_GOODS.length];
     const day = String(15 - (index % 14)).padStart(2, '0');
     const hour = String(20 - (index % 12)).padStart(2, '0');
-    const status = index < 15 ? '上架中' : '已下架';
+    const status = index < 20 ? '上架中' : '已下架';
     const onlineTime = index < 10 ? (base.onlineTime || `2026-07-${day} ${hour}:37:44`) : `2026-07-${day} ${hour}:37:44`;
     const productNo = index < 10 ? base.productNo : String(9000000000 - index * 7311);
     const thirdProductId = base.productType === '三方商品' ? String(812065 - index) : '';
@@ -101,20 +101,43 @@ function createGoods() {
   });
 }
 
-function loadChannelAccount() {
+const CHANNEL_USER_PHONES = {
+  '154420045': '18942914433',
+  '154577265': '13600365350',
+};
+
+function resolveChannelUserPhone(userId) {
+  if (CHANNEL_USER_PHONES[userId]) return CHANNEL_USER_PHONES[userId];
+  const suffix = String(userId).replace(/\D/g, '').slice(-4).padStart(4, '0');
+  return `1380000${suffix}`;
+}
+
+function createChannelAccount({ channelName = '咸鱼', accountId = '154420045' } = {}) {
+  return {
+    channelName,
+    accountId,
+    phone: resolveChannelUserPhone(accountId),
+  };
+}
+
+function normalizeChannelAccount(account) {
+  const accountId = String(account.userId || account.accountId || '').trim();
+  if (!accountId) return null;
+  return {
+    channelName: account.channelName || '咸鱼',
+    accountId,
+    phone: account.phone || resolveChannelUserPhone(accountId),
+  };
+}
+
+function loadChannelAccounts() {
   try {
     const saved = JSON.parse(localStorage.getItem(CHANNEL_ACCOUNT_STORAGE_KEY));
-    if (saved?.accountId) return saved;
+    if (Array.isArray(saved) && saved.length) return saved.map(normalizeChannelAccount).filter(Boolean);
   } catch {
-    // Invalid demo cache falls back to a newly generated account.
+    // Invalid demo cache falls back to the initial channel account.
   }
-  const account = {
-    channelName: '咸鱼',
-    accountId: `XY${String(Date.now()).slice(-10)}`,
-    accountName: '咸鱼',
-  };
-  localStorage.setItem(CHANNEL_ACCOUNT_STORAGE_KEY, JSON.stringify(account));
-  return account;
+  return [createChannelAccount()];
 }
 
 function formatDateTime(date = new Date()) {
@@ -180,7 +203,7 @@ function statusClass(status) {
 
 export default function GoodsManagement({ onOpenDetail, onCreateOrder }) {
   const [goods, setGoods] = useState(loadGoods);
-  const [channelAccount] = useState(loadChannelAccount);
+  const [channelAccounts, setChannelAccounts] = useState(loadChannelAccounts);
   const [draftFilters, setDraftFilters] = useState(EMPTY_FILTERS);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [selectedIds, setSelectedIds] = useState(new Set());
@@ -194,7 +217,7 @@ export default function GoodsManagement({ onOpenDetail, onCreateOrder }) {
   const [pendingOffline, setPendingOffline] = useState([]);
   const [showChannelAccount, setShowChannelAccount] = useState(false);
   const [orderProduct, setOrderProduct] = useState(null);
-  const [backendOrderForm, setBackendOrderForm] = useState({ channel: '咸鱼', channelOrderNo: '' });
+  const [backendOrderForm, setBackendOrderForm] = useState({ channelAccountId: '', channelOrderNo: '', depositOrderNo: '' });
   const [backendOrderError, setBackendOrderError] = useState('');
   const [orderResult, setOrderResult] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
@@ -203,6 +226,18 @@ export default function GoodsManagement({ onOpenDetail, onCreateOrder }) {
   useEffect(() => {
     localStorage.setItem(GOODS_STORAGE_KEY, JSON.stringify(goods));
   }, [goods]);
+
+  useEffect(() => {
+    setGoods(current => current.length < 30 ? createGoods() : current);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(CHANNEL_ACCOUNT_STORAGE_KEY, JSON.stringify(channelAccounts));
+  }, [channelAccounts]);
+
+  useEffect(() => {
+    setChannelAccounts(current => current.map(normalizeChannelAccount).filter(Boolean));
+  }, []);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -292,29 +327,37 @@ export default function GoodsManagement({ onOpenDetail, onCreateOrder }) {
 
   const openBackendOrder = product => {
     setOrderProduct(product);
-    setBackendOrderForm({ channel: '咸鱼', channelOrderNo: '' });
+    setBackendOrderForm({ channelAccountId: channelAccounts[0]?.accountId || '', channelOrderNo: '', depositOrderNo: '' });
     setBackendOrderError('');
   };
 
   const confirmBackendOrder = () => {
+    const channelAccount = channelAccounts.find(account => account.accountId === backendOrderForm.channelAccountId);
+    if (!channelAccount) {
+      setToast('请先在渠道账号管理中新增渠道账号');
+      return;
+    }
     const channelOrderNo = backendOrderForm.channelOrderNo.trim();
+    const depositOrderNo = backendOrderForm.depositOrderNo.trim();
     if (!channelOrderNo) {
-      setBackendOrderError('请输入咸鱼渠道对应的订单号');
+      setBackendOrderError('请输入渠道订单号');
       return;
     }
     let result;
     try {
       result = onCreateOrder?.({
         product: orderProduct,
-        channel: backendOrderForm.channel,
+        channel: channelAccount.channelName,
+        channelAccountId: channelAccount.accountId,
+        channelAccountPhone: channelAccount.phone,
         channelOrderNo,
+        depositOrderNo,
       });
     } catch {
       result = { success: false, reason: '系统异常，请稍后重试' };
     }
     if (!result?.success) {
       setOrderProduct(null);
-      setBackendOrderError('');
       setOrderResult({ type: 'error', reason: result?.reason || '系统异常，请稍后重试' });
       return;
     }
@@ -323,7 +366,6 @@ export default function GoodsManagement({ onOpenDetail, onCreateOrder }) {
       ? { ...item, status: '已下架', offlineTime: now, lastOperateTime: now, lastOperator: '邓辉（后台下单）' }
       : item));
     setOrderProduct(null);
-    setBackendOrderError('');
     setOrderResult({ type: 'success', orderNo: result.orderNo });
   };
 
@@ -467,13 +509,14 @@ export default function GoodsManagement({ onOpenDetail, onCreateOrder }) {
       </section>
 
       {pendingOffline.length > 0 && <ConfirmOffline count={pendingOffline.length} onCancel={() => setPendingOffline([])} onConfirm={confirmOffline} />}
-      {showChannelAccount && <ChannelAccountModal account={channelAccount} onClose={() => setShowChannelAccount(false)} />}
+      {showChannelAccount && <ChannelAccountModal accounts={channelAccounts} onAdd={account => setChannelAccounts(current => [...current, account])} onClose={() => setShowChannelAccount(false)} />}
       {orderProduct && (
         <BackendOrderModal
           product={orderProduct}
           form={backendOrderForm}
+          channelAccounts={channelAccounts}
           error={backendOrderError}
-          onChange={value => { setBackendOrderForm(current => ({ ...current, channelOrderNo: value })); setBackendOrderError(''); }}
+          onChange={(field, value) => { setBackendOrderForm(current => ({ ...current, [field]: value })); setBackendOrderError(''); }}
           onCancel={() => { setOrderProduct(null); setBackendOrderError(''); }}
           onConfirm={confirmBackendOrder}
         />
@@ -585,24 +628,72 @@ function ConfirmOffline({ count, onCancel, onConfirm }) {
   );
 }
 
-function ChannelAccountModal({ account, onClose }) {
+function ChannelAccountModal({ accounts, onAdd, onClose }) {
+  const [addDraft, setAddDraft] = useState(null);
+  const [addError, setAddError] = useState(null);
+
+  const openAdd = () => {
+    setAddDraft({ channelName: '', accountId: '' });
+    setAddError(null);
+  };
+
+  const confirmAdd = () => {
+    const channelName = addDraft.channelName.trim();
+    const accountId = addDraft.accountId.trim();
+    if (!channelName) {
+      setAddError({ field: 'channelName', message: '请输入渠道名称' });
+      return;
+    }
+    if (!accountId) {
+      setAddError({ field: 'accountId', message: '请输入账号ID' });
+      return;
+    }
+    if (accounts.some(account => account.accountId === accountId)) {
+      setAddError({ field: 'accountId', message: '账号ID已存在，请重新输入' });
+      return;
+    }
+    onAdd(createChannelAccount({ channelName, accountId }));
+    setAddDraft(null);
+    setAddError(null);
+  };
+
+  const updateAddDraft = (field, value) => {
+    setAddDraft(current => ({ ...current, [field]: value }));
+    setAddError(null);
+  };
+
   return (
     <div className="goods-admin-modal-layer" role="dialog" aria-modal="true" aria-label="渠道账号管理">
       <button className="goods-admin-modal-mask" aria-label="关闭" onClick={onClose} />
-      <div className="goods-admin-form-modal">
-        <div className="goods-admin-form-header"><h3>渠道账号管理</h3><button onClick={onClose}>×</button></div>
-        <div className="goods-admin-account-grid">
-          <div><span>渠道名称</span><strong>{account.channelName}</strong></div>
-          <div><span>账号ID</span><strong>{account.accountId}</strong></div>
-          <div><span>账号名称</span><strong>{account.accountName}</strong></div>
+      <div className="goods-admin-form-modal goods-admin-account-modal">
+        <div className="goods-admin-form-header">
+          <h3>渠道账号管理</h3>
+          <div className="goods-admin-form-header-actions"><button className="add" onClick={openAdd}>＋ 新增</button><button onClick={onClose}>×</button></div>
         </div>
+        <div className="goods-admin-account-table-wrap">
+          <table className="goods-admin-account-table">
+            <thead><tr><th>渠道名称</th><th>账号ID</th><th>手机号</th></tr></thead>
+            <tbody>{accounts.map(account => <tr key={account.accountId}><td>{account.channelName}</td><td>{account.accountId}</td><td>{account.phone}</td></tr>)}</tbody>
+          </table>
+        </div>
+        <div className="goods-admin-account-count">共 {accounts.length} 个渠道账号</div>
         <div className="goods-admin-confirm-actions"><button className="primary" onClick={onClose}>关 闭</button></div>
       </div>
+      {addDraft && (
+        <div className="goods-admin-submodal" role="dialog" aria-modal="true" aria-label="新增渠道账号">
+          <div className="goods-admin-form-header"><h3>新增渠道账号</h3><button onClick={() => setAddDraft(null)}>×</button></div>
+          <div className="goods-admin-account-form">
+            <label><span><em>*</em> 渠道名称</span><input autoFocus value={addDraft.channelName} placeholder="请输入渠道名称" onChange={event => updateAddDraft('channelName', event.target.value)} />{addError?.field === 'channelName' && <small>{addError.message}</small>}</label>
+            <label><span><em>*</em> 账号ID</span><input value={addDraft.accountId} placeholder="请输入账号ID（用户ID）" onChange={event => updateAddDraft('accountId', event.target.value)} onKeyDown={event => event.key === 'Enter' && confirmAdd()} />{addError?.field === 'accountId' && <small>{addError.message}</small>}</label>
+          </div>
+          <div className="goods-admin-confirm-actions"><button onClick={() => setAddDraft(null)}>取 消</button><button className="primary" onClick={confirmAdd}>确 认</button></div>
+        </div>
+      )}
     </div>
   );
 }
 
-function BackendOrderModal({ product, form, error, onChange, onCancel, onConfirm }) {
+function BackendOrderModal({ product, form, channelAccounts, error, onChange, onCancel, onConfirm }) {
   const money = value => `¥${Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   return (
     <div className="goods-admin-modal-layer" role="dialog" aria-modal="true" aria-label="后台下单">
@@ -617,8 +708,10 @@ function BackendOrderModal({ product, form, error, onChange, onCancel, onConfirm
             <label><span>出租金额</span><strong>{money(product.rent)}</strong></label>
             <label><span>押金</span><strong>{money(product.deposit)}</strong></label>
           </div>
-          <label><span><em>*</em> 下单渠道</span><select value={form.channel} disabled><option>咸鱼</option></select></label>
-          <label><span><em>*</em> 渠道订单号</span><input autoFocus value={form.channelOrderNo} placeholder="请输入咸鱼渠道订单号" onChange={event => onChange(event.target.value)} onKeyDown={event => event.key === 'Enter' && onConfirm()} />{error && <small>{error}</small>}</label>
+          <label><span><em>*</em> 下单渠道</span><select value={form.channelAccountId} onChange={event => onChange('channelAccountId', event.target.value)}>{channelAccounts.map(account => <option key={account.accountId} value={account.accountId}>{account.channelName}</option>)}</select></label>
+          <div className="goods-admin-order-spacer" aria-hidden="true" />
+          <label><span><em>*</em> 渠道订单号</span><input autoFocus value={form.channelOrderNo} placeholder="请输入渠道订单号" onChange={event => onChange('channelOrderNo', event.target.value)} />{error && <small>{error}</small>}</label>
+          <label><span>押金订单号</span><input value={form.depositOrderNo} placeholder="选填，请输入押金订单号" onChange={event => onChange('depositOrderNo', event.target.value)} onKeyDown={event => event.key === 'Enter' && onConfirm()} /></label>
         </div>
         <div className="goods-admin-confirm-actions"><button onClick={onCancel}>取 消</button><button className="primary" onClick={onConfirm}>确 认</button></div>
       </div>
