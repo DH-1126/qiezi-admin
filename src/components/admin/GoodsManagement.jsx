@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import './GoodsManagement.css';
 
-const GOODS_STORAGE_KEY = 'qiezi_admin_goods_v3';
+const GOODS_STORAGE_KEY = 'qiezi_admin_goods_v4';
 const CHANNEL_ACCOUNT_STORAGE_KEY = 'qiezi_channel_account_v1';
 const GOODS_IMAGE = `${import.meta.env.BASE_URL}assets/goods-avatar.png`;
 
@@ -75,11 +75,11 @@ const BASE_GOODS = [
 
 function createGoods() {
   const operators = ['', '詹志威', '王永祁', '顾修鸣'];
-  return Array.from({ length: 14 }, (_, index) => {
+  return Array.from({ length: 25 }, (_, index) => {
     const base = BASE_GOODS[index % BASE_GOODS.length];
     const day = String(15 - (index % 14)).padStart(2, '0');
     const hour = String(20 - (index % 12)).padStart(2, '0');
-    const status = index < 4 ? '上架中' : '已下架';
+    const status = index < 15 ? '上架中' : '已下架';
     const onlineTime = index < 10 ? (base.onlineTime || `2026-07-${day} ${hour}:37:44`) : `2026-07-${day} ${hour}:37:44`;
     const productNo = index < 10 ? base.productNo : String(9000000000 - index * 7311);
     const thirdProductId = base.productType === '三方商品' ? String(812065 - index) : '';
