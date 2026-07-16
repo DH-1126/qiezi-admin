@@ -1,4 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import GoodsManagement, { ProductDetailPage } from '../components/admin/GoodsManagement';
+import OrderDetailPage from '../components/admin/OrderDetailPage';
+import OrderShipModal from '../components/admin/OrderShipModal';
+
+const ORDER_STORAGE_KEY = 'qiezi_admin_orders_v2';
+
+function formatAdminDateTime(date = new Date()) {
+  const pad = value => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
 
 const menuItems = [
   { key: 'channel', label: '渠道管理', icon: '🔗', children: [
@@ -61,8 +71,6 @@ const menuItems = [
 ];
 
 const tabs = ['商品管理', '商品审核', '订单列表', '用户列表', '提现管理', '渠道配置', '新数据总览', '游戏配置', '商品属性配置', '游戏区服配置', '测试账号管理', '系统开关'];
-const token = () => localStorage.getItem('admin_token');
-const h = () => ({ 'Authorization': `Bearer ${token()}` });
 
 // 渠道 mock 数据
 const MOCK_CHANNELS = [
@@ -182,6 +190,24 @@ const MOCK_ORDERS = [
   { orderNo:'2026070262200', thirdPayNo:'4200003127202607025799922307', productId:'969663071617', thirdProductId:'', shipTime:'', type:'自建商品', title:'登录区服:QQ  总资产：20 M 纯币资产：20 M  角色：不破誓约 电锯惊魂 金牌射手 无题密令 未结卷宗 账密：扫码登录 段位：铂金 安全箱：2x2 靶场等级：4级 账号等级：60 训练中心：6级', phone:'13874237458', upChannel:'official', reportChannel:'xytg', belongChannel:'xytg', server:'扫码登录|QQ', status:'已取消', settleMode:'租期内打完', cost:41.67, rent:45.84, deposit:100, pay:145.84, fee:4.17, buyerPay:145.84, payMethod:'微信JSAPI支付', payChannel:'(207)茄子代售-微信原生支付-公众号模式', buyerRefund:'', sellerSettle:'', createTime:'2026-07-02 12:48:10', updateTime:'2026-07-02 12:51:06', operator:'system' },
 ];
 
+function normalizeOrders(orders) {
+  return orders.map(order => ({
+    orderChannel: '官方',
+    channelOrderNo: '',
+    ...order,
+  }));
+}
+
+function loadOrders() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ORDER_STORAGE_KEY));
+    if (Array.isArray(saved) && saved.length) return normalizeOrders(saved);
+  } catch {
+    // Invalid demo cache falls back to the initial order list.
+  }
+  return normalizeOrders(MOCK_ORDERS);
+}
+
 export default function Admin() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -189,9 +215,7 @@ export default function Admin() {
   const [expandedMenu, setExpandedMenu] = useState('goods');
   const [activeTab, setActiveTab] = useState('商品管理');
   const [collapsed, setCollapsed] = useState(false);
-  const [data, setData] = useState({ list: [], total: 0 });
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
+  const [selectedGoods, setSelectedGoods] = useState(null);
 
   // 渠道配置 state
   const [channels, setChannels] = useState(MOCK_CHANNELS);
@@ -247,9 +271,99 @@ export default function Admin() {
   const [orderFilters, setOrderFilters] = useState({ timeRange:'', payStatus:'', payPlatform:'', orderNo:'', buyerId:'', buyerPhone:'', sellerId:'', sellerPhone:'', title:'', productId:'', channelCode:'', thirdPayNo:'', thirdProductId:'', productType:'', shipTime:'', shipTimeEnd:'' });
   const [userFilters, setUserFilters] = useState({ keyword:'', status:'', regStart:'', regEnd:'' });
   const [orderTab, setOrderTab] = useState('全部');
-  const [orders, setOrders] = useState(MOCK_ORDERS);
+  const [orders, setOrders] = useState(loadOrders);
+  const backendOrderAttemptRef = useRef(0);
   const [showOrderDetail, setShowOrderDetail] = useState(false);
   const [orderDetail, setOrderDetail] = useState(null);
+  const [shipOrder, setShipOrder] = useState(null);
+  const [shipNotice, setShipNotice] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(orders));
+  }, [orders]);
+
+  const handleBackendOrder = ({ product, channel, channelOrderNo }) => {
+    backendOrderAttemptRef.current += 1;
+    if (backendOrderAttemptRef.current % 2 === 1) {
+      return { success: false, reason: '渠道订单同步失败，请稍后重试' };
+    }
+    const now = formatAdminDateTime();
+    const orderNo = `HT${Date.now()}`;
+    const pay = Number((Number(product.rent) + Number(product.deposit)).toFixed(2));
+    const fee = Number(Math.max(0, Number(product.rent) - Number(product.cost)).toFixed(2));
+    const newOrder = {
+      orderNo,
+      thirdPayNo: '',
+      productId: product.productNo,
+      thirdProductId: product.thirdProductId || '',
+      type: product.productType,
+      orderChannel: channel,
+      channelOrderNo,
+      buyerName: '咸鱼',
+      buyerId: '咸鱼',
+      buyerPhone: product.phone,
+      sellerId: product.sellerId,
+      sellerPhone: product.phone,
+      title: product.title,
+      phone: product.phone,
+      upChannel: product.channel || 'PC',
+      reportChannel: '后台下单',
+      belongChannel: channel,
+      server: `${product.loginMethod || '扫码登录'}|${product.gameServer}`,
+      status: '待发货',
+      settleMode: product.settlementMode,
+      cost: Number(product.cost),
+      rent: Number(product.rent),
+      deposit: Number(product.deposit),
+      pay,
+      fee,
+      buyerPay: pay,
+      payMethod: '渠道订单',
+      payChannel: channel,
+      buyerRefund: '',
+      sellerSettle: '',
+      createTime: now,
+      shipTime: '',
+      updateTime: now,
+      operator: '邓辉',
+      image: product.image,
+      rentDays: product.rentDays || 2,
+      productSnapshot: {
+        loginMethod: product.loginMethod,
+        accountLevel: product.accountLevel,
+        rank: product.rank,
+        banRecord: product.banRecord,
+        commonLoginArea: product.commonLoginArea,
+        faceOwner: product.faceOwner,
+        totalAsset: product.totalAsset,
+        pureCoin: product.pureCoin,
+        trainingCenter: product.trainingCenter,
+        shootingRange: product.shootingRange,
+        safeBox: product.safeBox,
+        awmAmmo: product.awmAmmo,
+        helmet6: product.helmet6,
+        armor6: product.armor6,
+        redAmmo: product.redAmmo,
+        card33: product.card33,
+        barrett: product.barrett,
+      },
+    };
+    setOrders(current => [newOrder, ...current]);
+    setOrderTab('待发货');
+    return { success: true, orderNo };
+  };
+
+  const handleConfirmShip = ({ orderNo, groupQrCode, groupQrName }) => {
+    const shipTime = formatAdminDateTime();
+    const updateTime = formatAdminDateTime();
+    setOrders(current => current.map(order => order.orderNo === orderNo
+      ? { ...order, status: '租用中', shipTime, rentStartTime: shipTime, operator: '邓辉', updateTime, groupQrCode, groupQrName }
+      : order));
+    setShipOrder(null);
+    setShipNotice(`订单 ${orderNo} 发货成功`);
+    window.setTimeout(() => setShipNotice(''), 2200);
+  };
+
   // 分组
   const [attrGroups, setAttrGroups] = useState(MOCK_ATTR_GROUPS);
   const [selectedGroupId, setSelectedGroupId] = useState(1);
@@ -258,12 +372,6 @@ export default function Admin() {
   const [groupForm, setGroupForm] = useState({ name: '', sort: '' });
   const [showRuleFormModal, setShowRuleFormModal] = useState(false);
   const [ruleFormMode, setRuleFormMode] = useState('add');
-
-  // 筛选
-  const [filters, setFilters] = useState({
-    productType: '全部商品', status: '全部商品', userId: '', phone: '', title: '', productNo: '', thirdId: '',
-    onlineStart: '', onlineEnd: '', offlineStart: '', offlineEnd: ''
-  });
 
   // 测试账号管理
   const [testAccounts, setTestAccounts] = useState([
@@ -379,26 +487,6 @@ export default function Admin() {
     localStorage.setItem('admin_token', 'test-token');
   };
 
-  const fetchData = async () => {
-    setLoading(true);
-    const p = new URLSearchParams({ page });
-    if (filters.productNo) p.set('keyword', filters.productNo);
-    if (filters.status && filters.status !== '全部商品') p.set('status', filters.status);
-    try {
-      const r = await fetch(`/mock-api/admin/products?${p}`, { headers: h() });
-      if (!r.ok) throw new Error();
-      setData(await r.json());
-    } catch(e) {
-      // GitHub Pages 无后端，使用 mock 数据
-      setData({ list: MOCK_GOODS, total: MOCK_GOODS.length });
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => { if (loggedIn) fetchData(); }, [page, filters.status, loggedIn]);
-
-  const act = async (url) => { await fetch(url, { method: 'POST', headers: h() }); fetchData(); };
-
   // 渠道筛选
   const filteredChannels = channels.filter(c =>
     (!channelFilters.name || c.name.includes(channelFilters.name)) &&
@@ -465,7 +553,7 @@ export default function Admin() {
             </button>
           </form>
           <p style={{ textAlign: 'center', fontSize: 12, color: '#c9cdd4', margin: '20px 0 0' }}>测试账号 15971444761 · 验证码 123123</p>
-          <p style={{ textAlign: 'center', fontSize: 11, color: '#d9d9d9', margin: '8px 0 0' }}>v1.0.0 · 2026.07.13</p>
+          <p style={{ textAlign: 'center', fontSize: 11, color: '#d9d9d9', margin: '8px 0 0' }}>v1.12 · 2026.07.16</p>
         </div>
       </div>
     </div>
@@ -499,7 +587,7 @@ export default function Admin() {
               {item.children && expandedMenu === item.key && (
                 <div style={{ paddingLeft: 56 }}>
                   {item.children.map(child => (
-                    <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); setShowWelcome(false); }}
+                    <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); if (child.key === 'goods-manage') setSelectedGoods(null); setShowWelcome(false); }}
                       style={{ padding: '8px 16px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px',
                         color: 'rgba(255,255,255,.55)', background: 'transparent' }}>
                       {child.label}
@@ -551,7 +639,7 @@ export default function Admin() {
               {!collapsed && item.children && expandedMenu === item.key && (
                 <div style={{ paddingLeft: 56 }}>
                   {item.children.map(child => (
-                    <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); }}
+                    <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); if (child.key === 'goods-manage') setSelectedGoods(null); }}
                       style={{ padding: '8px 16px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px',
                         color: activeMenu === child.key ? '#fff' : 'rgba(255,255,255,.55)', background: activeMenu === child.key ? '#1890ff' : 'transparent' }}>
                       {child.label}
@@ -575,8 +663,8 @@ export default function Admin() {
 
         {/* Tab 页签 */}
         <div style={{ background: '#fff', borderBottom: '1px solid #f0f0f0', padding: '0 16px', display: 'flex', gap: 2, height: 40, alignItems: 'flex-end' }}>
-          {tabs.map(t => (
-            <button key={t} onClick={() => { setActiveTab(t); if (t === '提现管理') setActiveMenu('finance-withdraw'); if (t === '订单列表') setActiveMenu('order-list'); if (t === '商品管理') setActiveMenu('goods-manage'); if (t === '商品审核') setActiveMenu('goods-audit'); if (t === '用户列表') setActiveMenu('user-list'); if (t === '渠道配置') setActiveMenu('channel-config'); if (t === '新数据总览') setActiveMenu('dashboard-new'); if (t === '游戏配置') setActiveMenu('game-config'); if (t === '商品属性配置') setActiveMenu('game-attribute'); if (t === '游戏区服配置') setActiveMenu('game-server'); if (t === '测试账号管理') setActiveMenu('user-test-account'); if (t === '系统开关') setActiveMenu('sys-switch'); }}
+          {[...tabs, ...(selectedGoods ? ['商品详情页'] : [])].map(t => (
+            <button key={t} onClick={() => { setActiveTab(t); if (t === '提现管理') setActiveMenu('finance-withdraw'); if (t === '订单列表') setActiveMenu('order-list'); if (t === '商品管理') { setActiveMenu('goods-manage'); setSelectedGoods(null); } if (t === '商品详情页') setActiveMenu('goods-manage'); if (t === '商品审核') setActiveMenu('goods-audit'); if (t === '用户列表') setActiveMenu('user-list'); if (t === '渠道配置') setActiveMenu('channel-config'); if (t === '新数据总览') setActiveMenu('dashboard-new'); if (t === '游戏配置') setActiveMenu('game-config'); if (t === '商品属性配置') setActiveMenu('game-attribute'); if (t === '游戏区服配置') setActiveMenu('game-server'); if (t === '测试账号管理') setActiveMenu('user-test-account'); if (t === '系统开关') setActiveMenu('sys-switch'); }}
               style={{ padding: '6px 14px', border: 'none', cursor: 'pointer', fontSize: 13,
                 background: activeTab === t ? '#fff' : '#fafafa', color: activeTab === t ? '#1890ff' : '#666',
                 borderBottom: activeTab === t ? '2px solid #1890ff' : '2px solid transparent', fontWeight: activeTab === t ? 600 : 400 }}>
@@ -584,35 +672,6 @@ export default function Admin() {
             </button>
           ))}
         </div>
-
-        {/* 筛选区 */}
-        {activeTab === '商品管理' && (
-          <div style={{ background: '#fff', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-              <input value={filters.onlineStart} onChange={e => setFilters({...filters, onlineStart: e.target.value})} placeholder="上架时间(开始)" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <span style={{ color: '#999' }}>~</span>
-              <input value={filters.onlineEnd} onChange={e => setFilters({...filters, onlineEnd: e.target.value})} placeholder="上架时间(结束)" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <input value={filters.offlineStart} onChange={e => setFilters({...filters, offlineStart: e.target.value})} placeholder="下架时间(开始)" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <span style={{ color: '#999' }}>~</span>
-              <input value={filters.offlineEnd} onChange={e => setFilters({...filters, offlineEnd: e.target.value})} placeholder="下架时间(结束)" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <select value={filters.productType} onChange={e => setFilters({...filters, productType: e.target.value})} style={{ height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
-                <option>全部商品</option><option>三方商品</option><option>自家商品</option>
-              </select>
-              <input value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} placeholder="商品状态" style={{ width: 120, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-              <input value={filters.userId} onChange={e => setFilters({...filters, userId: e.target.value})} placeholder="请输入用户ID" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <input value={filters.phone} onChange={e => setFilters({...filters, phone: e.target.value})} placeholder="请输入手机号" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <input value={filters.title} onChange={e => setFilters({...filters, title: e.target.value})} placeholder="请输入商品标题" style={{ width: 160, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <input value={filters.productNo} onChange={e => setFilters({...filters, productNo: e.target.value})} placeholder="请输入商品编号" style={{ width: 160, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <input value={filters.thirdId} onChange={e => setFilters({...filters, thirdId: e.target.value})} placeholder="三方商品ID" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-              <button onClick={fetchData} style={{ height: 32, padding: '0 16px', border: 'none', borderRadius: 2, background: '#1890ff', color: '#fff', fontSize: 13, cursor: 'pointer' }}>查 询</button>
-              <button onClick={async () => { setFilters({ productType: '全部商品', status: '全部商品', userId: '', phone: '', title: '', productNo: '', thirdId: '', onlineStart: '', onlineEnd: '', offlineStart: '', offlineEnd: '' }); }} style={{ height: 32, padding: '0 16px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', color: '#333', fontSize: 13, cursor: 'pointer' }}>重 置</button>
-              <button style={{ height: 32, padding: '0 12px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', color: '#333', fontSize: 13, cursor: 'pointer' }}>导 出</button>
-              <button disabled style={{ height: 32, padding: '0 16px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#f5f5f5', color: '#ccc', fontSize: 13, cursor: 'not-allowed' }}>批量下架</button>
-            </div>
-          </div>
-        )}
 
         {/* 渠道配置筛选区 */}
         {activeTab === '渠道配置' && (
@@ -837,49 +896,13 @@ export default function Admin() {
         {/* 内容表格 */}
         <div style={{ flex: 1, padding: 16, overflow: 'auto' }}>
           {activeTab === '商品管理' && (
-            <div style={{ background: '#fff', borderRadius: 2, overflow: 'hidden' }}>
-              {loading ? <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>加载中...</div> :
-              !data.list?.length ? <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>暂无数据</div> : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead>
-                    <tr style={{ background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
-                      {['','商品编号','三方商品ID','商品类型','渠道','商品标题','商品图片','区服','用户ID','手机号','成本金额','出租金额','押金金额','租期','状态','上架时间','下架时间','最后操作时间','操作'].map(h => (
-                        <th key={h} style={{ textAlign: 'left', padding: '10px 12px', fontWeight: 600, color: '#333', whiteSpace: 'nowrap', borderBottom: '1px solid #f0f0f0' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.list.map((item, i) => (
-                      <tr key={item.id} style={{ borderBottom: '1px solid #f0f0f0', background: i%2===0?'#fff':'#fafafa' }}>
-                        <td style={{ padding: '10px 12px' }}><input type="checkbox" /></td>
-                        <td style={{ padding: '10px 12px', color: '#1890ff' }}>{item.productNo}</td>
-                        <td style={{ padding: '10px 12px' }}>-</td>
-                        <td style={{ padding: '10px 12px' }}>{item.productNo && parseInt(item.productNo)%2===0 ? '三方商品':'自家商品'}</td>
-                        <td style={{ padding: '10px 12px' }}>official</td>
-                        <td style={{ padding: '10px 12px' }}><div style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title||'-'}</div></td>
-                        <td style={{ padding: '10px 12px' }}><span style={{ color: '#1890ff', cursor: 'pointer' }}>1张</span></td>
-                        <td style={{ padding: '10px 12px' }}>{item.server||'-'}</td>
-                        <td style={{ padding: '10px 12px', color: '#1890ff' }}>{item.sellerId}</td>
-                        <td style={{ padding: '10px 12px' }}>-</td>
-                        <td style={{ padding: '10px 12px' }}>{(item.price/100 * 0.82).toFixed(1)}</td>
-                        <td style={{ padding: '10px 12px' }}>{(item.price/100).toFixed(1)}</td>
-                        <td style={{ padding: '10px 12px' }}>{(item.deposit/100).toFixed(0)}</td>
-                        <td style={{ padding: '10px 12px' }}>{item.rentDays||'-'}</td>
-                        <td style={{ padding: '10px 12px' }}><span style={{ color: item.status==='selling'?'#52c41a':'#999' }}>{item.status==='selling'?'上架中':item.status==='offline'?'已下架':'待审核'}</span></td>
-                        <td style={{ padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.publishTime}</td>
-                        <td style={{ padding: '10px 12px', fontSize: 12, color: '#666' }}>-</td>
-                        <td style={{ padding: '10px 12px', fontSize: 12, color: '#666' }}>{item.updateTime||item.publishTime}</td>
-                        <td style={{ padding: '10px 12px', whiteSpace: 'nowrap' }}>
-                          <button style={{ border: 'none', background: 'none', color: '#1890ff', cursor: 'pointer', fontSize: 13 }}>查看详情</button>
-                          <span style={{ color: '#ddd', margin: '0 4px' }}>|</span>
-                          <button onClick={() => act(`/mock-api/admin/products/${item.id}/offline`)} style={{ border: 'none', background: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: 13 }}>下架</button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+            <GoodsManagement
+              onOpenDetail={item => { setSelectedGoods(item); setActiveTab('商品详情页'); setActiveMenu('goods-manage'); }}
+              onCreateOrder={handleBackendOrder}
+            />
+          )}
+          {activeTab === '商品详情页' && selectedGoods && (
+            <ProductDetailPage product={selectedGoods} onBack={() => { setSelectedGoods(null); setActiveTab('商品管理'); setActiveMenu('goods-manage'); }} />
           )}
 
           {/* 渠道配置表格 */}
@@ -928,12 +951,14 @@ export default function Admin() {
             </div>
           )}
 
-          {activeTab === '订单列表' && !showOrderDetail && <OrderTable orders={orders} orderTab={orderTab} filters={orderFilters} onDetail={o => { setOrderDetail(o); setShowOrderDetail(true); }} />}
+          {activeTab === '订单列表' && !showOrderDetail && <OrderTable orders={orders} orderTab={orderTab} filters={orderFilters} onDetail={o => { setOrderDetail(o); setShowOrderDetail(true); }} onShip={setShipOrder} />}
           {activeTab === '订单列表' && showOrderDetail && orderDetail && <OrderDetailPage order={orderDetail} onBack={() => setShowOrderDetail(false)} />}
+          {shipOrder && <OrderShipModal order={shipOrder} onCancel={() => setShipOrder(null)} onConfirm={handleConfirmShip} />}
+          {shipNotice && <div style={{ position:'fixed',top:76,left:'50%',zIndex:2700,padding:'10px 16px',color:'#333',background:'#fff',borderRadius:4,boxShadow:'0 4px 16px rgba(0,0,0,.15)',transform:'translateX(-50%)' }}>✓ {shipNotice}</div>}
           {activeTab === '商品审核' && <Placeholder text="商品审核" />}
           {activeTab === '用户列表' && <UserTable filters={userFilters} />}
           {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} />}
-          {activeTab === '提现管理' && <WithdrawalTable act={act} />}
+          {activeTab === '提现管理' && <WithdrawalTable />}
           {activeTab === '系统开关' && !switchTab && <SystemSwitchList switches={switches} onToggle={toggleSwitch} onEnter={key => setSwitchTab(key)} />}
           {activeTab === '系统开关' && switchTab && targetGroup && <SystemSwitchDetail group={targetGroup} onToggle={toggleSwitch} onBack={() => setSwitchTab(null)} />}
 
@@ -1141,14 +1166,6 @@ export default function Admin() {
           {activeTab === '账户管理' && <Placeholder text="财务管理 - 账户管理" />}
         </div>
 
-        {/* 底部分页 */}
-        {activeTab === '商品管理' && data.total > 10 && (
-          <div style={{ textAlign: 'center', padding: '12px 0', background: '#fff' }}>
-            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1} style={{ margin: '0 4px', padding: '4px 10px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', cursor: 'pointer', color: page===1?'#ccc':'#333' }}>{'<'}</button>
-            <span style={{ margin: '0 8px', color: '#666', fontSize: 13 }}>{page} / {Math.ceil(data.total/10)}</span>
-            <button onClick={() => setPage(p => p+1)} disabled={page>=Math.ceil(data.total/10)} style={{ margin: '0 4px', padding: '4px 10px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', cursor: 'pointer' }}>{'>'}</button>
-          </div>
-        )}
       </div>
 
       {/* 新增渠道弹窗 */}
@@ -1739,68 +1756,6 @@ export default function Admin() {
   );
 }
 
-function OrderDetailPage({ order, onBack }) {
-  const sections = [
-    { title: '租用信息', rows: [
-      ['订单号', order.orderNo], ['订单状态', order.status],
-      ['创建时间', order.createTime], ['发货时间', order.shipTime||'-'],
-      ['商品标题', order.title], ['手机号', order.phone],
-      ['结算模式', order.settleMode], ['游戏区服', order.server],
-    ]},
-    { title: '渠道信息', rows: [
-      ['商品上架渠道', order.upChannel], ['上报渠道', order.reportChannel],
-      ['归属渠道', order.belongChannel], ['商品类型', order.type],
-    ]},
-    { title: '支付信息', rows: [
-      ['成本金额(元)', order.cost], ['出租金额(元)', order.rent],
-      ['押金金额(元)', order.deposit], ['支付金额(元)', order.pay],
-      ['平台抽成(元)', order.fee], ['买家实付(元)', order.buyerPay],
-      ['买家实退(元)', order.buyerRefund||'-'], ['卖家结算(元)', order.sellerSettle||'-'],
-      ['支付方式', order.payMethod], ['支付渠道名称', order.payChannel],
-    ]},
-    { title: '关联信息', rows: [
-      ['商品ID', order.productId], ['三方商品ID', order.thirdProductId||'-'],
-      ['三方支付流水订单号', order.thirdPayNo||'-'], ['最后操作人', order.operator],
-    ]},
-  ];
-  const statusColor = { '待发货':'#1890ff','已取消':'#999','已超时':'#ff4d4f','待支付':'#faad14','租用中':'#52c41a' };
-  return (
-    <div style={{ background: '#f5f5f5', minHeight: '100%' }}>
-      <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 20px',background:'#fff',marginBottom:12,borderRadius:2 }}>
-        <div style={{ display:'flex',alignItems:'center',gap:12 }}>
-          <span style={{ fontSize:16,fontWeight:600,color:'#333' }}>{order.orderNo}</span>
-          <span style={{ padding:'2px 10px',borderRadius:3,fontSize:12,color:statusColor[order.status]||'#333',background:(statusColor[order.status]||'#f0f0f0')+'20',border:`1px solid ${statusColor[order.status]||'#d9d9d9'}` }}>{order.status}</span>
-        </div>
-        <button onClick={onBack} style={{ height:32,padding:'0 16px',border:'1px solid #d9d9d9',borderRadius:2,background:'#fff',color:'#333',fontSize:13,cursor:'pointer' }}>返 回</button>
-      </div>
-      {sections.map((sec, i) => (
-        <div key={i} style={{ background:'#fff',borderRadius:2,padding:'16px 20px',marginBottom:12 }}>
-          <div style={{ fontSize:14,fontWeight:600,color:'#333',marginBottom:12 }}>{sec.title}</div>
-          <table style={{ width:'100%',fontSize:13,borderCollapse:'collapse' }}>
-            <tbody>
-              {sec.rows.reduce((acc, row, j) => {
-                if (j % 3 === 0) acc.push([]);
-                acc[acc.length-1].push(row);
-                return acc;
-              }, []).map((triple, ri) => (
-                <tr key={ri} style={{ borderBottom:'1px solid #f0f0f0' }}>
-                  {triple.map(([label, value], ci) => (
-                    <td key={ci} style={{ padding:'10px 12px',width:'33.3%' }}>
-                      <span style={{ color:'#999',marginRight:8 }}>{label}</span>
-                      <span style={{ color:'#333' }}>{value}</span>
-                    </td>
-                  ))}
-                  {triple.length < 3 && <td style={{ padding:'10px 12px',width:'33.3%' }} />}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function Placeholder({ text }) {
   return <div style={{ background: '#fff', borderRadius: 2, textAlign: 'center', padding: 60, color: '#999', fontSize: 15 }}>{text}<br /><span style={{ fontSize: 13, marginTop: 8, display: 'block' }}>功能开发中...</span></div>;
 }
@@ -1815,13 +1770,13 @@ function Field({ label, required, children }) {
   </div>;
 }
 
-function OrderTable({ orders, orderTab, filters, onDetail }) {
+function OrderTable({ orders, orderTab, filters, onDetail, onShip }) {
   const filtered = (orderTab === '全部' ? orders : orders.filter(o => o.status === orderTab)).filter(o => {
     if (filters.shipTime && !o.shipTime) return false;
     if (filters.shipTime && !o.shipTime.includes(filters.shipTime)) return false;
     return true;
   });
-  const cols = ['订单号','三方支付流水订单号','商品ID','三方商品ID','商品类型','商品标题','商家图片','手机号','商品上架渠道','上报渠道','归属渠道','游戏区服','订单状态','结算模式','成本金额(元)','出租金额(元)','押金金额(元)','支付金额(元)','平台抽成(元)','买家实付(元)','支付方式','支付渠道名称','买家实退(元)','卖家结算(元)','创建时间','发货时间','最后操作时间','最后操作人','操作'];
+  const cols = ['订单号','三方支付流水订单号','商品ID','三方商品ID','商品类型','下单渠道','渠道订单号','商品标题','商家图片','手机号','商品上架渠道','上报渠道','归属渠道','游戏区服','订单状态','结算模式','成本金额(元)','出租金额(元)','押金金额(元)','支付金额(元)','平台抽成(元)','买家实付(元)','支付方式','支付渠道名称','买家实退(元)','卖家结算(元)','创建时间','发货时间','最后操作时间','最后操作人','操作'];
   const stickyTh = { position:'sticky',right:0,zIndex:2,background:'#fafafa' };
   const stickyTd = (bg) => ({ position:'sticky',right:0,zIndex:1,background:bg });
   const titleStyle = { display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical',overflow:'hidden',textOverflow:'ellipsis',lineHeight:1.5,maxWidth:220,wordBreak:'break-all' };
@@ -1829,7 +1784,7 @@ function OrderTable({ orders, orderTab, filters, onDetail }) {
     <div style={{ background: '#fff', borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
       <div style={{ position: 'relative' }}>
         <div style={{ overflow: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 4240 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 4560 }}>
             <thead>
               <tr style={{ background: '#fafafa' }}>
                 {cols.map(h => (
@@ -1846,6 +1801,8 @@ function OrderTable({ orders, orderTab, filters, onDetail }) {
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.productId}</td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.thirdProductId||'-'}</td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.type}</td>
+                  <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.orderChannel || '官方'}</td>
+                  <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.channelOrderNo || ''}</td>
                   <td style={{ padding:'8px',borderRight:'1px solid #f0f0f0' }}><div style={titleStyle} title={item.title}>{item.title}</div></td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0',color:'#1890ff',cursor:'pointer' }}>🖼️</td>
                   <td style={{ textAlign:'center',padding:'8px',borderRight:'1px solid #f0f0f0' }}>{item.phone}</td>
@@ -1872,7 +1829,7 @@ function OrderTable({ orders, orderTab, filters, onDetail }) {
                   <td style={{ padding:'6px 8px',whiteSpace:'nowrap',...stickyTd(bg) }}>
                     <div style={{ display:'flex',flexDirection:'column',gap:4,alignItems:'center' }}>
                       <button onClick={() => onDetail(item)} style={{ border:'none',background:'none',color:'#1890ff',cursor:'pointer',fontSize:13,padding:0 }}>查看详情</button>
-                      {item.status === '待发货' && <button style={{ border:'none',background:'none',color:'#1890ff',cursor:'pointer',fontSize:13,padding:0 }}>发货</button>}
+                      {item.status === '待发货' && <button onClick={() => onShip(item)} style={{ border:'none',background:'none',color:'#1890ff',cursor:'pointer',fontSize:13,padding:0 }}>发货</button>}
                       {(item.status === '待发货' || item.status === '待支付') && <button style={{ border:'none',background:'none',color:'#ff4d4f',cursor:'pointer',fontSize:13,padding:0 }}>取消订单</button>}
                     </div>
                   </td>
@@ -1974,7 +1931,7 @@ function UserTable({ filters }) {
   );
 }
 
-function WithdrawalTable({ act }) {
+function WithdrawalTable() {
   return (
     <div style={{ background: '#fff', borderRadius: 2, overflow: 'hidden' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
