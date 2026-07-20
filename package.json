@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mobile": "vite --config ../mobile/vite.config.js",
     "build": "vite build",
+    "build:mobile": "vite build --config ../mobile/vite.config.js",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "preview:mobile": "vite preview --config ../mobile/vite.config.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",

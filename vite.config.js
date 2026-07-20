@@ -6,6 +6,8 @@ export default defineConfig({
   base: '/qiezi-admin/',
   plugins: [react(), tailwindcss()],
   server: {
+    port: 5173,
+    strictPort: true,
     proxy: {
       '/mock-api': {
         target: 'http://localhost:3002',

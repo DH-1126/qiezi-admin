@@ -16,7 +16,7 @@ export async function request(url, options = {}) {
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(error.message || '请求失败');
+    throw new Error(error.message || error.error || '请求失败');
   }
 
   return res.json();

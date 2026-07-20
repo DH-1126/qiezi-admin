@@ -2,6 +2,42 @@ import { useEffect, useState, useRef } from 'react';
 import GoodsManagement, { ProductDetailPage } from '../components/admin/GoodsManagement';
 import OrderDetailPage from '../components/admin/OrderDetailPage';
 import OrderShipModal from '../components/admin/OrderShipModal';
+import {
+  AccountManagementPage,
+  BalanceFlowPage,
+  ConversationRecordsPage,
+  PaymentFlowPage,
+  ProductAuditPage,
+  RefundFlowPage,
+  RentRulesPage,
+  WithdrawalManagementPage,
+} from '../components/admin/AdminReferencePages';
+import {
+  AdSlotsPage,
+  BusinessAppsPage,
+  FeeConfigPage,
+  PaymentChannelConfigPage,
+  PaymentChannelInfoPage,
+  SystemNoticesPage,
+} from '../components/admin/AdminOperationPages';
+import {
+  BoundUsersPage,
+  MerchantConfigPage,
+  SupplierComparePage,
+  SupplierSyncRecordsPage,
+  WalletWhitelistPage,
+} from '../components/admin/AdminSupplierUserPages';
+import {
+  AppVersionPublishPage,
+  DataDictionaryPage,
+  DepartmentManagementPage,
+  MenuManagementPage,
+  MyDepartmentPage,
+  PositionManagementPage,
+  RoleManagementPage,
+  SystemUsersPage,
+  VersionChannelPage,
+} from '../components/admin/AdminVersionSystemPages';
 
 const ORDER_STORAGE_KEY = 'qiezi_admin_orders_v2';
 const ADMIN_ACCOUNT_NAME = '邓辉';
@@ -12,12 +48,12 @@ function formatAdminDateTime(date = new Date()) {
 }
 
 const menuItems = [
+  { key: 'dashboard', label: '数据看板', icon: '📊', children: [
+    { key: 'dashboard-old', label: '数据总览' },
+    { key: 'dashboard-new', label: '新数据总览' },
+  ]},
   { key: 'channel', label: '渠道管理', icon: '🔗', children: [
     { key: 'channel-config', label: '渠道配置' },
-  ]},
-  { key: 'dashboard', label: '数据看板', icon: '📊', children: [
-    { key: 'dashboard-new', label: '新数据总览' },
-    { key: 'dashboard-old', label: '数据总览' },
   ]},
   { key: 'service', label: '客服工作台', icon: '💬', children: [
     { key: 'service-record', label: '会话记录' },
@@ -31,8 +67,8 @@ const menuItems = [
     { key: 'order-refund', label: '退款流水' },
   ]},
   { key: 'finance', label: '财务管理', icon: '💰', children: [
-    { key: 'finance-account', label: '账户管理' },
     { key: 'finance-withdraw', label: '提现管理' },
+    { key: 'finance-account', label: '账户管理' },
   ]},
   { key: 'goods', label: '租号商品管理', icon: '📦', children: [
     { key: 'goods-audit', label: '商品审核' },
@@ -41,37 +77,63 @@ const menuItems = [
   ]},
   { key: 'operation', label: '运营管理', icon: '⚙️', children: [
     { key: 'op-app', label: '业务应用' },
-    { key: 'op-ad', label: '广告位配置' },
     { key: 'op-notice', label: '系统公告' },
-    { key: 'op-pay-channel', label: '支付通道总信息表' },
-    { key: 'op-pay-category', label: '支付通道类别配置' },
-    { key: 'op-pay-online', label: '线上支付通道配置' },
-  ]},
-  { key: 'users', label: '用户管理', icon: '👥', children: [
-    { key: 'user-list', label: '用户列表' },
-    { key: 'user-bind', label: '绑定用户列表' },
-    { key: 'user-wallet', label: '用户钱包白名单' },
-    { key: 'user-test-account', label: '测试账号管理' },
+    { key: 'op-ad', label: '广告位配置' },
+    { key: 'op-pay-channel', label: '支付通道信息表' },
+    { key: 'op-pay-category', label: '支付通道配置' },
+    { key: 'op-pay-online', label: '手续费配置' },
   ]},
   { key: 'supplier', label: '供货商菜单', icon: '🏪', children: [
     { key: 'supplier-config', label: '号商配置表' },
     { key: 'supplier-compare', label: '供货商对比' },
     { key: 'supplier-sync', label: '供货商商品同步记录' },
   ]},
+  { key: 'users', label: '用户管理', icon: '👥', children: [
+    { key: 'user-bind', label: '绑定用户列表' },
+    { key: 'user-wallet', label: '用户钱包白名单' },
+    { key: 'user-test-account', label: '测试账号管理' },
+    { key: 'user-list', label: '用户列表' },
+  ]},
   { key: 'version', label: '版本发布', icon: '🚀', children: [
     { key: 'version-app', label: 'App版本发布' },
     { key: 'version-channel', label: '发布渠道' },
   ]},
   { key: 'system', label: '系统管理', icon: '🖥️', children: [
+    { key: 'sys-switch', label: '系统开关' },
     { key: 'sys-user', label: '用户管理' },
     { key: 'sys-role', label: '角色管理' },
     { key: 'sys-menu', label: '菜单管理' },
+    { key: 'sys-department', label: '部门管理' },
+    { key: 'sys-my-department', label: '我的部门' },
+    { key: 'sys-position', label: '职务管理' },
     { key: 'sys-dict', label: '数据字典' },
-    { key: 'sys-switch', label: '系统开关' },
   ]},
 ];
 
-const tabs = ['商品管理', '商品审核', '订单列表', '用户列表', '提现管理', '渠道配置', '新数据总览', '游戏配置', '商品属性配置', '游戏区服配置', '测试账号管理', '系统开关'];
+const tabs = ['商品管理', '商品审核', '租金规则', '订单列表', '支付流水', '退款流水', '提现管理', '账户管理', '会话记录', '业务应用', '系统公告', '广告位配置', '支付通道信息表', '支付通道配置', '手续费配置', '用户钱包白名单', '测试账号管理', '用户列表', '绑定用户列表', '号商配置表', '供货商对比', '供货商商品同步记录', 'App版本发布', '发布渠道', '系统开关', '用户管理', '角色管理', '菜单管理', '部门管理', '我的部门', '职务管理', '数据字典', '渠道配置', '新数据总览', '游戏配置', '商品属性配置', '游戏区服配置'];
+const tabMenuMap = {
+  商品管理: 'goods-manage', 商品审核: 'goods-audit', 租金规则: 'goods-rule',
+  订单列表: 'order-list', 支付流水: 'order-pay', 退款流水: 'order-refund',
+  提现管理: 'finance-withdraw', 账户管理: 'finance-account', 余额流水: 'finance-account', 会话记录: 'service-record',
+  业务应用: 'op-app', 系统公告: 'op-notice', 广告位配置: 'op-ad', 支付通道信息表: 'op-pay-channel', 支付通道配置: 'op-pay-category', 手续费配置: 'op-pay-online',
+  用户钱包白名单: 'user-wallet', 用户列表: 'user-list', 绑定用户列表: 'user-bind',
+  号商配置表: 'supplier-config', 供货商对比: 'supplier-compare', 供货商商品同步记录: 'supplier-sync',
+  App版本发布: 'version-app', 发布渠道: 'version-channel',
+  系统开关: 'sys-switch', 用户管理: 'sys-user', 角色管理: 'sys-role', 菜单管理: 'sys-menu', 部门管理: 'sys-department', 我的部门: 'sys-my-department', 职务管理: 'sys-position', 数据字典: 'sys-dict',
+  渠道配置: 'channel-config', 新数据总览: 'dashboard-new',
+  游戏配置: 'game-config', 商品属性配置: 'game-attribute', 游戏区服配置: 'game-server',
+  测试账号管理: 'user-test-account', 商品详情页: 'goods-manage',
+};
+const tabParentMap = {
+  商品管理: 'goods', 商品审核: 'goods', 租金规则: 'goods',
+  订单列表: 'orders', 支付流水: 'orders', 退款流水: 'orders',
+  提现管理: 'finance', 账户管理: 'finance', 余额流水: 'finance', 会话记录: 'service',
+  业务应用: 'operation', 系统公告: 'operation', 广告位配置: 'operation', 支付通道信息表: 'operation', 支付通道配置: 'operation', 手续费配置: 'operation',
+  用户钱包白名单: 'users', 用户列表: 'users', 绑定用户列表: 'users', 测试账号管理: 'users',
+  号商配置表: 'supplier', 供货商对比: 'supplier', 供货商商品同步记录: 'supplier', 渠道配置: 'channel',
+  新数据总览: 'dashboard', 游戏配置: 'game', 商品属性配置: 'game', 游戏区服配置: 'game',
+  App版本发布: 'version', 发布渠道: 'version', 系统开关: 'system', 用户管理: 'system', 角色管理: 'system', 菜单管理: 'system', 部门管理: 'system', 我的部门: 'system', 职务管理: 'system', 数据字典: 'system', 商品详情页: 'goods',
+};
 
 // 渠道 mock 数据
 const MOCK_CHANNELS = [
@@ -244,6 +306,8 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState('商品管理');
   const [collapsed, setCollapsed] = useState(false);
   const [selectedGoods, setSelectedGoods] = useState(null);
+  const [goodsDetailReturn, setGoodsDetailReturn] = useState({ tab: '商品管理', menu: 'goods-manage' });
+  const [selectedBalanceAccount, setSelectedBalanceAccount] = useState(null);
 
   // 渠道配置 state
   const [channels, setChannels] = useState(MOCK_CHANNELS);
@@ -617,11 +681,11 @@ export default function Admin() {
                 {item.children && <span style={{ fontSize: 10 }}>{expandedMenu === item.key ? '▼' : '▶'}</span>}
               </div>
               {item.children && expandedMenu === item.key && (
-                <div style={{ paddingLeft: 56 }}>
+                <div style={{ paddingLeft: 38 }}>
                   {item.children.map(child => (
                     <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); if (child.key === 'goods-manage') setSelectedGoods(null); setShowWelcome(false); }}
-                      style={{ padding: '8px 16px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px',
-                        color: 'rgba(255,255,255,.55)', background: 'transparent' }}>
+                      style={{ padding: '8px 14px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px', whiteSpace: 'nowrap',
+                        overflow: 'hidden', textOverflow: 'ellipsis', color: 'rgba(255,255,255,.55)', background: 'transparent' }}>
                       {child.label}
                     </div>
                   ))}
@@ -669,10 +733,10 @@ export default function Admin() {
                 {!collapsed && item.children && <span style={{ fontSize: 10 }}>{expandedMenu === item.key ? '▼' : '▶'}</span>}
               </div>
               {!collapsed && item.children && expandedMenu === item.key && (
-                <div style={{ paddingLeft: 56 }}>
+                <div style={{ paddingLeft: 38 }}>
                   {item.children.map(child => (
                     <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); if (child.key === 'goods-manage') setSelectedGoods(null); }}
-                      style={{ padding: '8px 16px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px',
+                      style={{ padding: '8px 14px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         color: activeMenu === child.key ? '#fff' : 'rgba(255,255,255,.55)', background: activeMenu === child.key ? '#1890ff' : 'transparent' }}>
                       {child.label}
                     </div>
@@ -694,10 +758,10 @@ export default function Admin() {
         </header>
 
         {/* Tab 页签 */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #f0f0f0', padding: '0 16px', display: 'flex', gap: 2, height: 40, alignItems: 'flex-end' }}>
-          {[...tabs, ...(selectedGoods ? ['商品详情页'] : [])].map(t => (
-            <button key={t} onClick={() => { setActiveTab(t); if (t === '提现管理') setActiveMenu('finance-withdraw'); if (t === '订单列表') setActiveMenu('order-list'); if (t === '商品管理') { setActiveMenu('goods-manage'); setSelectedGoods(null); } if (t === '商品详情页') setActiveMenu('goods-manage'); if (t === '商品审核') setActiveMenu('goods-audit'); if (t === '用户列表') setActiveMenu('user-list'); if (t === '渠道配置') setActiveMenu('channel-config'); if (t === '新数据总览') setActiveMenu('dashboard-new'); if (t === '游戏配置') setActiveMenu('game-config'); if (t === '商品属性配置') setActiveMenu('game-attribute'); if (t === '游戏区服配置') setActiveMenu('game-server'); if (t === '测试账号管理') setActiveMenu('user-test-account'); if (t === '系统开关') setActiveMenu('sys-switch'); }}
-              style={{ padding: '6px 14px', border: 'none', cursor: 'pointer', fontSize: 13,
+        <div style={{ background: '#fff', borderBottom: '1px solid #f0f0f0', padding: '0 16px', display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', overflowY: 'hidden', gap: 2, height: 40, alignItems: 'flex-end', scrollbarWidth: 'none' }}>
+          {[...tabs, ...(selectedGoods ? ['商品详情页'] : []), ...(selectedBalanceAccount ? ['余额流水'] : [])].map(t => (
+            <button key={t} onClick={() => { setActiveTab(t); setActiveMenu(tabMenuMap[t] || activeMenu); setExpandedMenu(tabParentMap[t] || expandedMenu); if (t === '商品管理') setSelectedGoods(null); }}
+              style={{ padding: '6px 14px', border: 'none', cursor: 'pointer', fontSize: 13, flex: '0 0 auto', whiteSpace: 'nowrap',
                 background: activeTab === t ? '#fff' : '#fafafa', color: activeTab === t ? '#1890ff' : '#666',
                 borderBottom: activeTab === t ? '2px solid #1890ff' : '2px solid transparent', fontWeight: activeTab === t ? 600 : 400 }}>
               {t}
@@ -884,16 +948,6 @@ export default function Admin() {
           </div>
         </div>}
 
-        {activeTab === '提现管理' && <div style={{ background: '#fff', padding: '12px 16px', borderBottom: '1px solid #f0f0f0', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <input placeholder="用户ID" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-          <input placeholder="手机号" style={{ width: 140, height: 32, padding: '0 8px', border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13 }} />
-          <select style={{ height: 32, border: '1px solid #d9d9d9', borderRadius: 2, fontSize: 13, padding: '0 8px' }}>
-            <option>全部状态</option><option>审核中</option><option>已打款</option><option>已拒绝</option>
-          </select>
-          <button style={{ height: 32, padding: '0 16px', border: 'none', borderRadius: 2, background: '#1890ff', color: '#fff', fontSize: 13, cursor: 'pointer' }}>查 询</button>
-          <button style={{ height: 32, padding: '0 16px', border: '1px solid #d9d9d9', borderRadius: 2, background: '#fff', color: '#333', fontSize: 13, cursor: 'pointer' }}>重 置</button>
-        </div>}
-
         {activeTab === '用户列表' && <div style={{ background: '#fff', padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 24px', rowGap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -944,12 +998,12 @@ export default function Admin() {
         <div style={{ flex: 1, padding: 16, overflow: 'auto' }}>
           {activeTab === '商品管理' && (
             <GoodsManagement
-              onOpenDetail={item => { setSelectedGoods(item); setActiveTab('商品详情页'); setActiveMenu('goods-manage'); }}
+              onOpenDetail={item => { setSelectedGoods(item); setGoodsDetailReturn({tab:'商品管理',menu:'goods-manage'}); setActiveTab('商品详情页'); setActiveMenu('goods-manage'); }}
               onCreateOrder={handleBackendOrder}
             />
           )}
           {activeTab === '商品详情页' && selectedGoods && (
-            <ProductDetailPage product={selectedGoods} onBack={() => { setSelectedGoods(null); setActiveTab('商品管理'); setActiveMenu('goods-manage'); }} />
+            <ProductDetailPage product={selectedGoods} onBack={() => { setSelectedGoods(null); setActiveTab(goodsDetailReturn.tab); setActiveMenu(goodsDetailReturn.menu); }} />
           )}
 
           {/* 渠道配置表格 */}
@@ -1002,10 +1056,36 @@ export default function Admin() {
           {activeTab === '订单列表' && showOrderDetail && orderDetail && <OrderDetailPage order={orderDetail} onBack={() => setShowOrderDetail(false)} />}
           {shipOrder && <OrderShipModal order={shipOrder} onCancel={() => setShipOrder(null)} onConfirm={handleConfirmShip} />}
           {shipNotice && <div style={{ position:'fixed',top:76,left:'50%',zIndex:2700,padding:'10px 16px',color:'#333',background:'#fff',borderRadius:4,boxShadow:'0 4px 16px rgba(0,0,0,.15)',transform:'translateX(-50%)' }}>✓ {shipNotice}</div>}
-          {activeTab === '商品审核' && <Placeholder text="商品审核" />}
+          {activeTab === '会话记录' && <ConversationRecordsPage />}
+          {activeTab === '支付流水' && <PaymentFlowPage />}
+          {activeTab === '退款流水' && <RefundFlowPage />}
+          {activeTab === '商品审核' && <ProductAuditPage onOpenDetail={item => { setSelectedGoods(item); setGoodsDetailReturn({tab:'商品审核',menu:'goods-audit'}); setActiveTab('商品详情页'); setActiveMenu('goods-audit'); }} />}
+          {activeTab === '租金规则' && <RentRulesPage />}
           {activeTab === '用户列表' && <UserTable filters={userFilters} />}
           {activeTab === '测试账号管理' && <TestAccountTable accounts={filteredTestAccounts} />}
-          {activeTab === '提现管理' && <WithdrawalTable />}
+          {activeTab === '提现管理' && <WithdrawalManagementPage />}
+          {activeTab === '账户管理' && <AccountManagementPage onOpenLedger={account => { setSelectedBalanceAccount(account); setActiveTab('余额流水'); setActiveMenu('finance-account'); setExpandedMenu('finance'); }} />}
+          {activeTab === '余额流水' && selectedBalanceAccount && <BalanceFlowPage account={selectedBalanceAccount} onBack={() => { setSelectedBalanceAccount(null); setActiveTab('账户管理'); setActiveMenu('finance-account'); setExpandedMenu('finance'); }} />}
+          {activeTab === '业务应用' && <BusinessAppsPage />}
+          {activeTab === '广告位配置' && <AdSlotsPage />}
+          {activeTab === '系统公告' && <SystemNoticesPage />}
+          {activeTab === '支付通道信息表' && <PaymentChannelInfoPage />}
+          {activeTab === '支付通道配置' && <PaymentChannelConfigPage />}
+          {activeTab === '手续费配置' && <FeeConfigPage />}
+          {activeTab === '用户钱包白名单' && <WalletWhitelistPage />}
+          {activeTab === '绑定用户列表' && <BoundUsersPage />}
+          {activeTab === '号商配置表' && <MerchantConfigPage />}
+          {activeTab === '供货商对比' && <SupplierComparePage />}
+          {activeTab === '供货商商品同步记录' && <SupplierSyncRecordsPage />}
+          {activeTab === 'App版本发布' && <AppVersionPublishPage />}
+          {activeTab === '发布渠道' && <VersionChannelPage />}
+          {activeTab === '用户管理' && <SystemUsersPage />}
+          {activeTab === '角色管理' && <RoleManagementPage />}
+          {activeTab === '菜单管理' && <MenuManagementPage />}
+          {activeTab === '部门管理' && <DepartmentManagementPage />}
+          {activeTab === '我的部门' && <MyDepartmentPage />}
+          {activeTab === '职务管理' && <PositionManagementPage />}
+          {activeTab === '数据字典' && <DataDictionaryPage />}
           {activeTab === '系统开关' && !switchTab && <SystemSwitchList switches={switches} onToggle={toggleSwitch} onEnter={key => setSwitchTab(key)} />}
           {activeTab === '系统开关' && switchTab && targetGroup && <SystemSwitchDetail group={targetGroup} onToggle={toggleSwitch} onBack={() => setSwitchTab(null)} />}
 
@@ -1209,8 +1289,6 @@ export default function Admin() {
           {activeTab === '供货商菜单' && <Placeholder text="供货商菜单" />}
           {activeTab === '版本发布' && <Placeholder text="版本发布" />}
           {activeTab === '系统管理' && <Placeholder text="系统管理 - 用户/角色/菜单/字典" />}
-          {activeTab === '租金规则' && <Placeholder text="租金规则" />}
-          {activeTab === '账户管理' && <Placeholder text="财务管理 - 账户管理" />}
         </div>
 
       </div>
@@ -1978,19 +2056,6 @@ function UserTable({ filters }) {
       <div style={{ padding:'12px 16px',textAlign:'right',fontSize:13,color:'#666',borderTop:'1px solid #f0f0f0' }}>
         共 {filtered.length} 条数据
       </div>
-    </div>
-  );
-}
-
-function WithdrawalTable() {
-  return (
-    <div style={{ background: '#fff', borderRadius: 2, overflow: 'hidden' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-        <thead><tr style={{ background: '#fafafa' }}>
-          {['','用户','金额','打款账户','状态','申请时间','操作'].map(h => <th key={h} style={{ textAlign:'left',padding:'10px 12px',fontWeight:600,color:'#333',borderBottom:'1px solid #f0f0f0' }}>{h}</th>)}
-        </tr></thead>
-        <tbody><tr><td colSpan={7} style={{ textAlign:'center',padding:40,color:'#999' }}>点击查询加载提现数据</td></tr></tbody>
-      </table>
     </div>
   );
 }

@@ -1,75 +1,94 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import './Layout.css';
 
 export default function Layout() {
-  const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const handleLogout = () => { logout(); navigate('/login'); };
-  const isVerified = user?.kycStatus === 'verified';
+  const [keyword, setKeyword] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [headerScrolled, setHeaderScrolled] = useState(false);
+  const figmaAssets = `${import.meta.env.BASE_URL}assets/figma-v2/`;
+  const legacyAssets = `${import.meta.env.BASE_URL}assets/web-home/`;
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    const value = keyword.trim();
+    navigate(value ? `/?keyword=${encodeURIComponent(value)}` : '/');
+  };
+
+  useEffect(() => {
+    const updateHeader = () => setHeaderScrolled(window.scrollY > 8);
+    updateHeader();
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    return () => window.removeEventListener('scroll', updateHeader);
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F7F8FA]">
-      {/* 顶部工具栏 */}
-      <div className="bg-gradient-to-r from-[#DAFFE2] to-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 h-10 flex items-center justify-between text-sm text-[#29344A]">
-          <span>HI~ 欢迎访问茄子代售交易平台！</span>
-          <div className="flex items-center gap-4">
-            {user ? (
-              <><span>{user.nickname}</span><button onClick={handleLogout} className="bg-transparent border-none cursor-pointer text-[#64687A] hover:text-[#29344A] text-sm">退出</button></>
-            ) : (
-              <Link to="/login" className="text-[#4452A9] no-underline">请登录/注册</Link>
-            )}
-            <Link to="/orders" className="text-[#29344A] no-underline">订单消息</Link>
-            <Link to="/profile" className="text-[#29344A] no-underline">个人中心</Link>
-            <Link to="/announcements" className="text-[#29344A] no-underline">帮助中心</Link>
-            <Link to="/admin" className="text-[#29344A] no-underline">管理后台</Link>
-          </div>
-        </div>
-      </div>
+    <div className="site-shell">
+      <header className={`site-header ${headerScrolled ? 'is-scrolled' : 'is-at-top'}`}>
+        <div className="site-container site-header-inner">
+          <Link to="/" className="site-logo" aria-label="茄子代售首页">
+            <img className="site-logo-mark" src={`${figmaAssets}logo-mark.svg`} alt="" />
+            <span className="site-logo-wordmark">
+              <img src={`${figmaAssets}logo-wordmark.png`} alt="茄子代售" />
+            </span>
+          </Link>
 
-      {/* 主导航 + 搜索 */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-14">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 font-bold text-xl text-[#202125] no-underline">
-              <span className="text-2xl">🍆</span>茄子代售
+          <button type="button" className="site-mobile-menu" onClick={() => setMobileMenuOpen((value) => !value)} aria-label="打开导航">
+            <span /><span /><span />
+          </button>
+
+          <nav className={`site-main-nav ${mobileMenuOpen ? 'open' : ''}`}>
+            <Link to="/" className="active" onClick={() => setMobileMenuOpen(false)}>资源号租赁</Link>
+            <Link to="/seller" onClick={() => setMobileMenuOpen(false)}>
+              出哈夫币<img className="site-hot-badge" src={`${figmaAssets}hot-badge.svg`} alt="HOT" />
             </Link>
-            <div className="hidden md:flex items-center gap-0">
-              <Link to="/" className="px-4 py-4 text-[#202125] no-underline text-sm border-b-2 border-[#202125] font-medium">资源号租赁</Link>
-              <Link to="/seller" className="px-4 py-4 text-[#64687A] hover:text-[#202125] no-underline text-sm">出哈夫币</Link>
-              <Link to="/orders" className="px-4 py-4 text-[#64687A] hover:text-[#202125] no-underline text-sm">我的订单</Link>
-              <Link to="/announcements" className="px-4 py-4 text-[#64687A] hover:text-[#202125] no-underline text-sm">官方公告</Link>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <input placeholder="综合性价比..." className="bg-[#F2F3F5] border border-[#E8EAED] rounded-lg px-3 py-2 text-sm text-[#202125] w-48 focus:outline-none" />
-            <button className="bg-[#202125] text-white rounded-lg px-4 py-2 text-sm font-medium whitespace-nowrap">搜索</button>
-            <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden text-[#202125] p-2 bg-transparent border-none cursor-pointer">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {menuOpen ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/> : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>}
-              </svg>
-            </button>
-          </div>
-        </div>
-        {menuOpen && (
-          <div className="md:hidden border-t bg-white px-4 py-3 flex flex-col gap-3">
-            <Link to="/" onClick={()=>setMenuOpen(false)} className="text-[#202125] no-underline text-sm">资源号租赁</Link>
-            <Link to="/seller" onClick={()=>setMenuOpen(false)} className="text-[#64687A] no-underline text-sm">出哈夫币</Link>
-            <Link to="/orders" onClick={()=>setMenuOpen(false)} className="text-[#64687A] no-underline text-sm">我的订单</Link>
-            <Link to="/announcements" onClick={()=>setMenuOpen(false)} className="text-[#64687A] no-underline text-sm">官方公告</Link>
-            {!user && <Link to="/login" onClick={()=>setMenuOpen(false)} className="text-[#4452A9] no-underline text-sm">登录/注册</Link>}
-          </div>
-        )}
-      </nav>
+            <Link to="/orders" onClick={() => setMobileMenuOpen(false)}>我的订单</Link>
+            <Link to="/announcements" onClick={() => setMobileMenuOpen(false)}>官方公告</Link>
+          </nav>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
-        <Outlet />
+          <form className="site-search" onSubmit={handleSearch}>
+            <input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="哈夫币36-39比例" aria-label="搜索商品" />
+            <button type="submit">
+              <img src={`${figmaAssets}search-icon.svg`} alt="" />
+              搜索
+            </button>
+          </form>
+
+          <button type="button" className="site-mobile-scan">
+            <img className="site-phone-hand" src={`${figmaAssets}phone-hand.png`} alt="" />
+            <span><b>移动端扫一扫</b><small>方便 / 快捷 / 安全</small></span>
+            <img className="site-scan-arrow" src={`${figmaAssets}scan-arrow.svg`} alt="" />
+          </button>
+        </div>
+      </header>
+
+      <main className="site-main">
+        <div className="site-container">
+          <Outlet />
+        </div>
       </main>
 
-      <footer className="bg-[#202125] py-6 text-center text-[#9EAAB9] text-xs mt-8">
-        <p>茄子代售 © 2024 — 三角洲行动账号租赁平台</p>
+      <footer className="site-footer">
+        <div className="site-container">
+          <ul className="site-guarantees">
+            <li><span>✓</span><div><b>权威认证</b><small>商品/服务品质保障</small></div></li>
+            <li><span>盾</span><div><b>官方授权</b><small>正版授权，购物安全无风险</small></div></li>
+            <li><span>低</span><div><b>低价保障</b><small>天天低价，畅选无忧</small></div></li>
+            <li><span>售</span><div><b>售后无忧</b><small>专业客服，极速响应</small></div></li>
+          </ul>
+          <div className="site-footer-info">
+            <div>
+              <b>官方客服</b>
+              <p>每天 9:00-24:00 客服在线</p>
+              <div className="site-footer-links">
+                <Link to="/announcements">官方公告</Link><Link to="/announcements">帮助中心</Link><Link to="/announcements">关于我们</Link><Link to="/orders">我的订单</Link><Link to="/profile">我的钱包</Link>
+              </div>
+              <small>Copyright Reserved © 2024-2027 武汉新巢科技有限公司 版权所有</small>
+            </div>
+            <div className="site-footer-qr"><img src={`${legacyAssets}qrcode.png`} alt="茄子代售公众号" /><span>茄子代售公众号</span></div>
+          </div>
+        </div>
       </footer>
     </div>
   );
