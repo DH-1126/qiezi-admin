@@ -1,0 +1,11 @@
+{
+  "name": "qiezi-mobile",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npm --prefix .. run dev:mobile",
+    "build": "npm --prefix .. run build:mobile",
+    "preview": "npm --prefix .. run preview:mobile"
+  }
+}

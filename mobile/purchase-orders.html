@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <meta name="theme-color" content="#ffffff">
+  <title>茄子交易 - 购买订单</title>
+  <style>
+    :root{--title:#29344a;--text:#64687a;--secondary:#828c99;--page:#f2f3f5;--line:#f7f8fa;--danger:#f53f3f;--top:92px;--tabs:44px}
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#dfe3e8;color:var(--title)}
+    body{display:flex;align-items:center;justify-content:center;min-height:100dvh;overflow:hidden;font-family:"MiSans VF","MiSans","PingFang SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+    button{padding:0;border:0;outline:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    p{margin:0}.stage{position:relative;width:375px;height:816px;flex:0 0 auto}.screen{position:absolute;left:0;top:0;width:375px;height:816px;overflow:hidden;transform-origin:left top;background:var(--page);box-shadow:0 0 28px rgba(34,43,57,.12)}
+    .navigation{position:absolute;inset:0 0 auto;z-index:20;height:var(--top);background:#fff;border-bottom:.5px solid var(--line)}
+    .statusbar{height:44px;position:relative;color:#000;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}.time{position:absolute;left:24px;top:12px;width:54px;text-align:center;font-size:15px;font-weight:600;line-height:20px;letter-spacing:-.5px}.system-icons{position:absolute;right:15px;top:16px;width:68px;height:14px;display:flex;align-items:center;justify-content:flex-end;gap:5px}.signal{display:flex;align-items:flex-end;gap:1.5px;height:11px}.signal i{display:block;width:2.4px;border-radius:2px;background:#111}.signal i:nth-child(1){height:4px}.signal i:nth-child(2){height:6px}.signal i:nth-child(3){height:8px}.signal i:nth-child(4){height:11px}.wifi{width:14px;height:10px;border:2px solid #111;border-left-color:transparent;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;position:relative}.wifi::after{content:"";position:absolute;left:4px;top:4px;width:3px;height:3px;border-radius:50%;background:#111}.battery{width:23px;height:11px;border:1.3px solid #111;border-radius:2.5px;padding:1.5px;position:relative}.battery::before{content:"";display:block;width:16px;height:6px;border-radius:1px;background:#111}.battery::after{content:"";position:absolute;right:-3px;top:3px;width:1.5px;height:4px;border-radius:0 1px 1px 0;background:#111}
+    .nav-row{height:48px;position:relative;display:flex;align-items:center;justify-content:center}.nav-title{margin:0;font-size:16px;font-weight:600;line-height:24px}.back-button{position:absolute;left:8px;top:4px;width:40px;height:40px;display:grid;place-items:center}.back-button svg{width:24px;height:24px}
+    .tabs-wrap{position:absolute;left:0;right:0;top:var(--top);z-index:15;height:var(--tabs);overflow:hidden;background:#fff}.tabs{height:100%;display:flex;align-items:stretch;overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}.tabs::-webkit-scrollbar{display:none}.tab{position:relative;height:44px;flex:0 0 auto;padding:0 18px;color:var(--secondary);font-size:13px;white-space:nowrap}.tab.active{color:var(--title);font-weight:600}.tab.active::after{content:"";position:absolute;left:50%;bottom:0;width:60px;height:2px;transform:translateX(-50%);background:var(--title)}
+    .order-scroll{position:absolute;inset:calc(var(--top) + var(--tabs)) 0 34px;overflow-y:auto;overflow-x:hidden;padding:12px;background:var(--page);scrollbar-width:none;overscroll-behavior:contain}.order-scroll::-webkit-scrollbar{display:none}.order-card{margin-bottom:12px;overflow:hidden;border-radius:4px;background:#fff}.order-head{height:33px;display:flex;align-items:center;padding:0 16px;border-bottom:.5px solid var(--line);font-size:10px;line-height:20px;color:var(--secondary)}.order-no{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.copy-button{flex:0 0 auto;margin-left:5px;color:var(--title);font-size:11px}.order-date{flex:0 0 auto;margin-left:auto;white-space:nowrap}.order-body{padding:12px 16px 10px}.order-title{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2;font-size:14px;line-height:22px}.meta{margin-top:8px;color:var(--secondary);font-size:12px;line-height:20px}.order-summary{min-height:39px;display:flex;align-items:center;padding:8px 16px;border-top:.5px solid var(--page);font-size:12px}.amount-label{color:var(--secondary)}.amount{color:var(--danger);font-size:14px;font-weight:600}.status{margin-left:auto;color:var(--secondary)}.status.pending{color:#f77234}.actions{min-height:40px;display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:4px 16px 8px}.action{height:28px;padding:0 16px;border-radius:2px;background:var(--page);color:var(--text);font-size:12px}.action.primary{background:#202125;color:#fff}
+    .empty{height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--secondary);font-size:13px}.empty svg{width:112px;height:86px;margin-bottom:12px}.gesture{position:absolute;inset:auto 0 0;height:34px;background:#fff}.gesture::after{content:"";position:absolute;left:50%;bottom:8px;width:134px;height:5px;transform:translateX(-50%);border-radius:100px;background:rgba(0,0,0,.95)}.toast{position:absolute;left:50%;bottom:54px;z-index:50;max-width:300px;padding:9px 14px;transform:translate(-50%,10px);border-radius:6px;background:rgba(27,34,43,.9);color:#fff;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <main class="screen" id="prototypeScreen" aria-label="购买订单列表">
+      <header class="navigation"><div class="statusbar" aria-hidden="true"><span class="time">9:41</span><div class="system-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></div></div><div class="nav-row"><button class="back-button" id="backButton" aria-label="返回"><svg viewBox="0 0 24 24" fill="none"><path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h1 class="nav-title">购买订单</h1></div></header>
+      <nav class="tabs-wrap" aria-label="购买订单状态"><div class="tabs" id="tabs"></div></nav>
+      <section class="order-scroll" id="orderScroll" aria-live="polite"></section>
+      <div class="gesture" aria-hidden="true"></div><div class="toast" id="toast" role="status"></div>
+    </main>
+  </div>
+  <script>
+    (()=>{
+      const tabItems=[['all','全部订单'],['pending-payment','待支付'],['pending-delivery','待发货'],['renting','租用中'],['settling','待结算'],['completed','已完成'],['overdue','已超时'],['cancelled-buyer','买家取消交易'],['cancelled-seller','卖家取消交易']];
+      const orders=[
+        {id:'2026071663797',date:'2026-07-16 16:26:27',title:'登录区服:微信 总资产：123 M 纯币资产：84 M 角色：凌霄戍卫 账密：扫码登录 段位：铂金 安全箱：1x2',server:'扫码登录|微信',type:'资源号租赁',amount:'477.70',status:'overdue'},
+        {id:'2026071563675',date:'2026-07-15 11:45:10',title:'登录区服:QQ 总资产：254 M 纯币资产：140 M 角色：不破誓约 电锯惊魂 金牌射手 账密：扫码登录',server:'扫码登录|QQ',type:'资源号租赁',amount:'328.00',status:'pending-payment'},
+        {id:'2026071565522',date:'2026-07-15 09:18:43',title:'微信登录 纯币：5600万 安全箱：2x2 训练中心：6级 协商保底消耗',server:'扫码登录|微信',type:'资源号租赁',amount:'231.00',status:'completed'},
+        {id:'2026071465444',date:'2026-07-14 21:02:18',title:'QQ登录 总资产：286 M 纯币资产：168 M 蜂医-危险物质 威龙-壮志凌云',server:'扫码登录|QQ',type:'资源号租赁',amount:'168.00',status:'renting'},
+        {id:'2026071363471',date:'2026-07-13 18:36:56',title:'微信登录 总资产：346 M 纯币资产：201 M 3x3安全箱 训练中心满级',server:'扫码登录|微信',type:'资源号租赁',amount:'499.00',status:'pending-payment'},
+        {id:'2026071365327',date:'2026-07-13 15:11:09',title:'QQ账密登录 纯币资产：92 M 露娜-黑天际线 蜂医-无题密令',server:'账密登录|QQ',type:'资源号租赁',amount:'260.00',status:'cancelled-buyer'},
+        {id:'2026062961712',date:'2026-06-29 22:27:35',title:'微信扫码登录 总资产：410 M 纯币资产：230 M 蝶影特勤套装',server:'扫码登录|微信',type:'资源号租赁',amount:'388.00',status:'pending-delivery'},
+        {id:'2026062961711',date:'2026-06-29 22:08:12',title:'QQ登录 绝密战备充足 满级靶场 3x3安全箱 多款限定枪皮',server:'扫码登录|QQ',type:'资源号租赁',amount:'620.00',status:'settling'},
+        {id:'2026062959856',date:'2026-06-29 13:46:20',title:'微信登录 纯币资产：76 M 账号等级：60 训练中心：6级',server:'扫码登录|微信',type:'资源号租赁',amount:'188.00',status:'pending-payment'},
+        {id:'2026060556601',date:'2026-06-05 10:22:44',title:'QQ扫码登录 总资产：310 M 黑鹰段位 多款干员外观',server:'扫码登录|QQ',type:'资源号租赁',amount:'366.00',status:'completed'},
+        {id:'2026052653337',date:'2026-05-26 16:07:31',title:'微信账密登录 纯币：105 M 哈夫币充足 安全箱：2x3',server:'账密登录|微信',type:'资源号租赁',amount:'288.00',status:'cancelled-seller'},
+        {id:'2026041641440',date:'2026-04-16 12:30:18',title:'QQ扫码登录 总资产：520 M 满改武器仓库 训练中心满级',server:'扫码登录|QQ',type:'资源号租赁',amount:'520.00',status:'pending-payment'}
+      ];
+      const statusNames=Object.fromEntries(tabItems);const stage=document.getElementById('stage');const screen=document.getElementById('prototypeScreen');const tabs=document.getElementById('tabs');const orderScroll=document.getElementById('orderScroll');const toast=document.getElementById('toast');let currentStatus='all';let toastTimer;
+      const fitScreen=()=>{const scale=Math.min(1,window.innerWidth/375,window.innerHeight/816);stage.style.width=`${375*scale}px`;stage.style.height=`${816*scale}px`;screen.style.transform=`scale(${scale})`};
+      const notify=text=>{toast.textContent=text;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1600)};
+      const emptyMarkup=()=>`<div class="empty"><svg viewBox="0 0 120 92" fill="none" aria-hidden="true"><path d="M24 25h72v51H24z" fill="#e9ebf0"/><path d="m35 18 17 10h33l9-10" stroke="#c9cdd4" stroke-width="2" stroke-linecap="round"/><path d="M30 34h60v35H30z" fill="#f7f8fa"/><path d="M48 49h24M52 58h16" stroke="#c9cdd4" stroke-width="2" stroke-linecap="round"/></svg><span>暂无订单</span></div>`;
+      const cardMarkup=order=>{const pending=order.status==='pending-payment';return `<article class="order-card" data-status="${order.status}"><div class="order-head"><span class="order-no">订单编号:${order.id}</span><button class="copy-button" data-copy="${order.id}">复制</button><span class="order-date">${order.date}</span></div><div class="order-body"><p class="order-title">${order.title}</p><div class="meta"><p>游戏区服 : ${order.server}</p><p>商品类型 : ${order.type}</p></div></div><div class="order-summary"><span class="amount-label">订单金额(含押金)：</span><span class="amount">¥${order.amount}</span><span class="status ${pending?'pending':''}">${statusNames[order.status]}</span></div><div class="actions">${pending?'<button class="action" data-action="取消订单">取消订单</button><button class="action primary" data-action="立即支付">立即支付</button>':'<button class="action" data-action="查看详情">查看详情</button>'}</div></article>`};
+      const render=()=>{const visible=currentStatus==='all'?orders:orders.filter(order=>order.status===currentStatus);orderScroll.innerHTML=visible.length?visible.map(cardMarkup).join(''):emptyMarkup();orderScroll.scrollTop=0;tabs.querySelectorAll('.tab').forEach(tab=>{const active=tab.dataset.status===currentStatus;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));if(active)tab.scrollIntoView({block:'nearest',inline:'center'})})};
+      const setStatus=(status,updateUrl=true)=>{currentStatus=tabItems.some(item=>item[0]===status)?status:'all';if(updateUrl){const url=new URL(location.href);url.searchParams.set('status',currentStatus);history.replaceState({status:currentStatus},'',url)}render()};
+      tabs.innerHTML=tabItems.map(([value,label])=>`<button class="tab" role="tab" data-status="${value}">${label}</button>`).join('');
+      tabs.addEventListener('click',event=>{const tab=event.target.closest('.tab');if(tab)setStatus(tab.dataset.status)});
+      orderScroll.addEventListener('click',event=>{const copy=event.target.closest('[data-copy]');if(copy){if(navigator.clipboard)navigator.clipboard.writeText(copy.dataset.copy).catch(()=>{});notify('订单编号已复制');return}const action=event.target.closest('[data-action]');if(action)notify(`${action.dataset.action}功能将在后续原型中接入`)});
+      document.getElementById('backButton').addEventListener('click',()=>{window.location.href='my.html'});
+      window.addEventListener('resize',fitScreen);fitScreen();setStatus(new URLSearchParams(location.search).get('status')||'all',false);
+      document.addEventListener('keydown',event=>{if(event.key==='Escape')document.getElementById('backButton').click()});
+    })();
+  </script>
+</body>
+</html>

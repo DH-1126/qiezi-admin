@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <meta name="theme-color" content="#ffffff">
+  <title>茄子交易 - 我的</title>
+  <style>
+    :root{
+      --primary:#202125;
+      --title:#29344a;
+      --text:#64687a;
+      --secondary:#9eaab9;
+      --page:#f2f3f5;
+      --hover:#e9ebf0;
+      --line:#e5e9f2;
+      --danger:#f53f3f;
+      --cyan:#28b8d5;
+      --top:92px;
+      --bottom:84px;
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#dfe3e8;color:var(--title)}
+    body{display:flex;align-items:center;justify-content:center;min-height:100dvh;overflow:hidden;font-family:"MiSans VF","MiSans","PingFang SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+    button,input{font:inherit}
+    button{padding:0;border:0;outline:0;background:none;color:inherit;cursor:pointer}
+    .stage{position:relative;width:375px;height:816px;flex:0 0 auto}
+    .screen{position:absolute;left:0;top:0;width:375px;height:816px;overflow:hidden;transform-origin:left top;background:var(--page);box-shadow:0 0 28px rgba(34,43,57,.12)}
+
+    .navigation{position:absolute;inset:0 0 auto;z-index:40;height:var(--top);background:#fff}
+    .statusbar{height:44px;position:relative;color:#000;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}
+    .time{position:absolute;left:24px;top:12px;width:54px;height:21px;text-align:center;font-size:15px;font-weight:600;line-height:20px;letter-spacing:-.5px}
+    .system-icons{position:absolute;right:15px;top:16px;width:68px;height:14px;display:flex;align-items:center;justify-content:flex-end;gap:5px}
+    .signal{display:flex;align-items:flex-end;gap:1.5px;height:11px}.signal i{display:block;width:2.4px;border-radius:2px;background:#111}.signal i:nth-child(1){height:4px}.signal i:nth-child(2){height:6px}.signal i:nth-child(3){height:8px}.signal i:nth-child(4){height:11px}
+    .wifi{width:14px;height:10px;border:2px solid #111;border-left-color:transparent;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;position:relative}.wifi::after{content:"";position:absolute;left:4px;top:4px;width:3px;height:3px;border-radius:50%;background:#111}
+    .battery{width:23px;height:11px;border:1.3px solid #111;border-radius:2.5px;padding:1.5px;position:relative}.battery::before{content:"";display:block;width:16px;height:6px;border-radius:1px;background:#111}.battery::after{content:"";position:absolute;right:-3px;top:3px;width:1.5px;height:4px;border-radius:0 1px 1px 0;background:#111}
+    .nav-row{height:48px;position:relative;display:flex;align-items:center;justify-content:center;background:#fff}
+    .nav-title{font-size:16px;font-weight:600;line-height:24px}
+    .more-button{position:absolute;right:12px;width:32px;height:32px;display:grid;place-items:center;font-size:22px;letter-spacing:2px}
+
+    .content-scroll{position:absolute;left:0;right:0;top:var(--top);bottom:var(--bottom);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none;background:linear-gradient(#fff 0,#f7f8fa 180px,var(--page) 260px)}
+    .content-scroll::-webkit-scrollbar{display:none}
+    .profile{height:104px;display:flex;align-items:center;padding:8px 12px 12px}
+    .avatar{width:56px;height:56px;flex:0 0 auto;border-radius:50%;object-fit:cover;border:1px solid rgba(41,52,74,.1);background:#d9dde3}
+    .profile-info{min-width:0;margin-left:12px}
+    .profile-id{margin:0;font-size:16px;font-weight:600;line-height:24px}
+    .profile-status{display:flex;align-items:center;gap:5px;margin-top:4px;color:var(--secondary);font-size:11px;line-height:16px}
+    .profile-status i{width:6px;height:6px;border-radius:50%;background:#43ab79}
+
+    .wallet-card{width:351px;height:89px;margin:0 12px;padding:12px 16px;border-radius:4px;background:var(--hover)}
+    .wallet-head{height:24px;display:flex;align-items:center;justify-content:space-between}
+    .wallet-title{font-size:16px;font-weight:600;line-height:24px}
+    .wallet-detail{display:flex;align-items:center;color:var(--title);font-size:12px;line-height:20px}
+    .chevron{width:18px;height:18px;flex:0 0 auto;color:var(--secondary)}
+    .wallet-bottom{display:flex;align-items:flex-end;justify-content:space-between;margin-top:7px}
+    .balance{display:flex;align-items:baseline;gap:3px}.balance strong{font-family:Inter,-apple-system,sans-serif;font-size:24px;line-height:30px}.balance span{color:var(--text);font-size:12px}
+    .withdraw{width:82px;height:29px;border-radius:2px;background:var(--primary);color:#fff;font-size:12px;font-weight:500}
+
+    .order-section{padding:22px 12px 16px}
+    .section-title{margin:0 0 12px 4px;font-size:16px;font-weight:600;line-height:24px}
+    .order-grid{height:70px;display:grid;grid-template-columns:repeat(4,1fr)}
+    .order-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;color:var(--title);font-size:12px;line-height:20px}
+    .order-icon{width:30px;height:30px;padding:2px;color:var(--title);overflow:visible}
+    .badge{position:absolute;left:calc(50% + 8px);top:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#e63c45;color:#fff;font-size:10px;font-weight:600;line-height:17px;text-align:center}
+    .accent{fill:var(--cyan)}
+
+    .menu-card{margin:0 12px;border-radius:4px;overflow:hidden;background:#fff}
+    .menu-card + .menu-card{margin-top:8px;margin-bottom:18px}
+    .menu-row{width:100%;height:52px;display:flex;align-items:center;padding:0 16px;text-align:left}
+    .menu-row + .menu-row{border-top:.5px solid var(--page)}
+    .menu-icon{width:20px;height:20px;flex:0 0 auto;color:var(--title)}
+    .menu-label{min-width:0;flex:1;margin-left:10px;font-size:14px;line-height:22px}
+    .menu-note{margin-right:4px;color:var(--secondary);font-size:11px}
+    .switch{width:40px;height:24px;position:relative;margin-right:0;border-radius:15px;background:var(--primary);transition:.2s}
+    .switch::after{content:"";position:absolute;right:4px;top:4px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12);transition:.2s}
+    .switch.off{background:#c9cdd4}.switch.off::after{right:20px}
+
+    .tabbar{position:absolute;inset:auto 0 0;z-index:40;height:var(--bottom);background:#fff;border-top:1px solid var(--page)}
+    .tabs{height:50px;display:flex}.tab{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px;color:var(--secondary);font-size:10px;font-weight:500;line-height:10px}.tab svg{width:34px;height:34px;padding:5px}.tab.active{color:var(--primary)}
+    .gesture{height:34px;position:relative}.gesture::after{content:"";position:absolute;left:50%;bottom:8px;width:134px;height:5px;transform:translateX(-50%);border-radius:100px;background:rgba(0,0,0,.95)}
+
+    .popover{position:absolute;right:12px;top:82px;z-index:55;display:none;width:116px;padding:6px;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 8px 24px rgba(27,36,48,.16)}
+    .popover.show{display:block}.popover button{width:100%;height:36px;text-align:center;font-size:12px}.popover button + button{border-top:1px solid var(--page)}
+    .overlay{position:absolute;inset:0;z-index:80;display:none;align-items:flex-end;background:rgba(22,29,39,.55)}
+    .overlay.show{display:flex}
+    .sheet{width:100%;padding:8px 16px 24px;border-radius:12px 12px 0 0;background:#fff;animation:sheetUp .18s ease-out}
+    @keyframes sheetUp{from{transform:translateY(24px);opacity:.5}}
+    .sheet-handle{width:35px;height:4px;margin:0 auto 16px;border-radius:2px;background:rgba(0,0,0,.1)}
+    .sheet-title{margin:0 0 6px;text-align:center;font-size:16px;font-weight:600}.sheet-desc{margin:0 0 16px;text-align:center;color:var(--secondary);font-size:12px}
+    .amount-input{height:46px;display:flex;align-items:center;padding:0 14px;border-radius:4px;background:var(--page)}.amount-input span{font-size:20px;font-weight:600}.amount-input input{min-width:0;flex:1;padding:0 8px;border:0;outline:0;background:transparent;font-size:18px}.amount-input input::placeholder{color:var(--secondary)}
+    .sheet-actions{display:flex;gap:12px;margin-top:18px}.sheet-actions button{height:42px;flex:1;border-radius:4px;font-size:14px;font-weight:600}.cancel{border:1px solid var(--line)}.confirm{background:var(--primary);color:#fff}
+    .logout-sheet{width:100%;overflow:hidden;border-radius:12px 12px 0 0;background:var(--page);animation:sheetUp .18s ease-out}
+    .logout-main{background:#fff}.logout-message{min-height:76px;display:flex;align-items:center;justify-content:center;padding:14px 18px;border-bottom:.5px solid var(--page);color:var(--secondary);font-size:12px;line-height:20px;text-align:center}.logout-action,.logout-cancel{width:100%;height:50px;background:#fff;font-size:14px}.logout-action{color:var(--title)}.logout-gap{height:8px;background:var(--page)}.logout-gesture{height:34px;position:relative;background:#fff}.logout-gesture::after{content:"";position:absolute;left:50%;bottom:8px;width:134px;height:5px;transform:translateX(-50%);border-radius:100px;background:#000}
+    .toast{position:absolute;left:50%;bottom:104px;z-index:100;max-width:300px;padding:9px 14px;transform:translate(-50%,10px);border-radius:6px;background:rgba(27,34,43,.9);color:#fff;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <main class="screen" id="prototypeScreen" data-node-id="8603:18136" aria-label="茄子交易个人中心">
+      <header class="navigation">
+        <div class="statusbar" aria-hidden="true">
+          <span class="time">9:41</span>
+          <div class="system-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></div>
+        </div>
+        <div class="nav-row"><h1 class="nav-title">游戏账号交易平台</h1></div>
+      </header>
+
+      <div class="content-scroll" id="contentScroll">
+        <section class="profile" aria-label="个人信息">
+          <img class="avatar" src="assets/avatar.webp" alt="用户头像">
+          <div class="profile-info"><p class="profile-id">ID: 00419</p><div class="profile-status"><i></i><span>账号状态正常</span></div></div>
+        </section>
+
+        <section class="wallet-card" data-node-id="8603:18145" aria-label="我的钱包">
+          <div class="wallet-head"><span class="wallet-title">我的钱包</span><button class="wallet-detail" id="walletDetailButton">查看详情<svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+          <div class="wallet-bottom"><div class="balance"><strong>0.00</strong><span>余额 (元)</span></div><button class="withdraw" id="withdrawButton">提现</button></div>
+        </section>
+
+        <section class="order-section" aria-label="订单中心">
+          <h2 class="section-title">订单中心</h2>
+          <div class="order-grid">
+            <button class="order-item" data-order-page="buy-all"><span class="badge">12</span><svg class="order-icon" viewBox="0 0 32 32" fill="none"><path class="accent" d="M4 7h3l2.1 13.5h15.6L28 10H9"/><path d="M4 7h3l2.1 13.5h15.6L28 10H9M12 26a1.5 1.5 0 1 0 0 .1M23 26a1.5 1.5 0 1 0 0 .1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>购买记录</span></button>
+            <button class="order-item" data-order-page="buy-pending"><span class="badge">4</span><svg class="order-icon" viewBox="0 0 32 32" fill="none"><rect class="accent" x="8" y="7" width="18" height="20" rx="1"/><path d="M7 5h18v22H7V5Zm5 6h8m-8 5h8m-8 5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>待支付订单</span></button>
+            <button class="order-item" data-order-page="sell-all"><svg class="order-icon" viewBox="0 0 32 32" fill="none"><path class="accent" d="M5 17h22v10H5z"/><path d="M6 12h20l2 7v8H4v-8l2-7Zm6 7h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>出售记录</span></button>
+            <button class="order-item" data-order-page="sell-pending"><svg class="order-icon" viewBox="0 0 32 32" fill="none"><circle class="accent" cx="17" cy="17" r="10"/><circle cx="16" cy="16" r="11" stroke="currentColor" stroke-width="2"/><path d="M16 9v8h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>待发货订单</span></button>
+          </div>
+        </section>
+
+        <section class="menu-card" aria-label="账号与平台设置">
+          <button class="menu-row" id="realNameRow"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="1" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="11" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 16c.8-1.6 4.2-1.6 5 0M14 10h4m-4 4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="menu-label">实名认证</span><span class="menu-note">已认证</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="menu-row" data-setting-page="password"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="10" rx="1" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="menu-label">登录密码</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="menu-row" data-setting-page="binding"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="m9.5 14.5 5-5M7.6 16.4l-1.5 1.5a3.5 3.5 0 0 1-5-5l3-3a3.5 3.5 0 0 1 5 0M16.4 7.6l1.5-1.5a3.5 3.5 0 0 1 5 5l-3 3a3.5 3.5 0 0 1-5 0" transform="translate(0 -2)" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="menu-label">第三方授权绑定</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="menu-row" data-setting-page="about"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M8 5a4 4 0 0 1 4 4v1m4 9a4 4 0 0 1-4-4v-1M5 8a4 4 0 0 1 4-4m10 12a4 4 0 0 1-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="m8 13 3 3 6-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span class="menu-label">关于我们</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="menu-row" data-setting-page="privacy"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M4 11V7l3-3h10l3 3v4M6 11v7m12-7v7M3 11h18M8 15h2m4 0h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="menu-label">隐私协议</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <button class="menu-row" data-setting-page="agreement"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M5 3h10l4 4v14H5V3Zm10 0v5h4M8 12h8m-8 4h6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="menu-label">用户协议</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          <div class="menu-row" id="recommendRow"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="m12 3 2.5 5.2 5.7.8-4.1 4 1 5.7-5.1-2.7-5.1 2.7 1-5.7-4.1-4 5.7-.8L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span class="menu-label">个性化推荐</span><button class="switch" id="recommendSwitch" role="switch" aria-checked="true" aria-label="个性化推荐"></button></div>
+        </section>
+
+        <section class="menu-card"><button class="menu-row" id="logoutButton"><svg class="menu-icon" viewBox="0 0 24 24" fill="none"><path d="M10 4H4v16h6M14 8l4 4-4 4m4-4H8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="menu-label">退出登录</span><svg class="chevron" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></section>
+      </div>
+
+      <nav class="tabbar" aria-label="底部导航">
+        <div class="tabs">
+          <button class="tab" data-tab="buy"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 9 7-1.2 11H4.2L3 10l9-7Zm0 4.2L7.2 11l.6 6h2.7l.5-4h4l.5 4h.7l.6-6L12 7.2Z"/></svg><span>我要买</span></button>
+          <button class="tab" data-tab="sell"><svg viewBox="0 0 24 24" fill="currentColor"><path d="m13.5 3-8 14h10.1l-1.2-2H9l4.7-8.2L20 17h-2.1l1.2 2H3L12 3h1.5Z"/></svg><span>出哈夫币</span></button>
+          <button class="tab" data-tab="message"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16l-1 12H8l-4 3V5Zm4 4v2h8V9H8Zm0 4v2h6v-2H8Z"/></svg><span>订单消息</span></button>
+          <button class="tab active" data-tab="my"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 11c5 0 8 2.2 8 5v2H4v-2c0-2.8 3-5 8-5Z"/></svg><span>我的</span></button>
+        </div>
+        <div class="gesture" aria-hidden="true"></div>
+      </nav>
+
+      <div class="overlay" id="logoutOverlay" role="dialog" aria-modal="true" aria-label="退出登录确认">
+        <section class="logout-sheet"><div class="logout-main"><p class="logout-message">退出后不会删除任何历史数据，下次登录依然可以使用<br>本账号</p><button class="logout-action" id="logoutConfirm">退出登录</button></div><div class="logout-gap"></div><button class="logout-cancel" data-close="logout">取消</button><div class="logout-gesture" aria-hidden="true"></div></section>
+      </div>
+      <div class="toast" id="toast" role="status"></div>
+    </main>
+  </div>
+
+  <script>
+    (()=>{
+      const stage=document.getElementById('stage');
+      const screen=document.getElementById('prototypeScreen');
+      const fitScreen=()=>{const scale=Math.min(1,window.innerWidth/375,window.innerHeight/816);stage.style.width=`${375*scale}px`;stage.style.height=`${816*scale}px`;screen.style.transform=`scale(${scale})`};
+      window.addEventListener('resize',fitScreen);fitScreen();
+
+      const toast=document.getElementById('toast');let toastTimer;
+      const notify=text=>{toast.textContent=text;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1800)};
+      document.querySelectorAll('[data-action]').forEach(button=>button.addEventListener('click',()=>notify(`${button.dataset.action}页面将在后续原型中接入`)));
+      document.getElementById('realNameRow').addEventListener('click',()=>{window.location.href='verification.html'});
+      const settingRoutes={password:'password.html',binding:'binding.html',about:'about.html',privacy:'privacy.html',agreement:'agreement.html'};
+      document.querySelectorAll('[data-setting-page]').forEach(button=>button.addEventListener('click',()=>{window.location.href=settingRoutes[button.dataset.settingPage]}));
+      const orderRoutes={
+        'buy-all':'purchase-orders.html?status=all',
+        'buy-pending':'purchase-orders.html?status=pending-payment',
+        'sell-all':'sale-orders.html?status=all',
+        'sell-pending':'sale-orders.html?status=pending-delivery'
+      };
+      document.querySelectorAll('[data-order-page]').forEach(button=>button.addEventListener('click',()=>{window.location.href=orderRoutes[button.dataset.orderPage]}));
+
+      const logoutOverlay=document.getElementById('logoutOverlay');
+      document.getElementById('walletDetailButton').addEventListener('click',()=>{window.location.href='wallet.html'});
+      document.getElementById('withdrawButton').addEventListener('click',()=>{window.location.href='wallet.html?view=withdraw'});
+      document.getElementById('logoutButton').addEventListener('click',()=>logoutOverlay.classList.add('show'));
+      document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>button.closest('.overlay').classList.remove('show')));
+      document.querySelectorAll('.overlay').forEach(overlay=>overlay.addEventListener('click',event=>{if(event.target===overlay)overlay.classList.remove('show')}));
+      document.getElementById('logoutConfirm').addEventListener('click',()=>{logoutOverlay.classList.remove('show');notify('原型模式：已取消真实退出')});
+
+      const recommendSwitch=document.getElementById('recommendSwitch');
+      recommendSwitch.addEventListener('click',event=>{event.stopPropagation();const off=recommendSwitch.classList.toggle('off');recommendSwitch.setAttribute('aria-checked',String(!off));notify(off?'已关闭个性化推荐':'已开启个性化推荐')});
+      document.querySelector('[data-tab="buy"]').addEventListener('click',()=>{window.location.href='index.html'});
+      document.querySelector('[data-tab="sell"]').addEventListener('click',()=>notify('出哈夫币页面将在后续原型中接入'));
+      document.querySelector('[data-tab="message"]').addEventListener('click',()=>notify('订单消息页面将在后续原型中接入'));
+      document.querySelector('[data-tab="my"]').addEventListener('click',()=>document.getElementById('contentScroll').scrollTo({top:0,behavior:'smooth'}));
+      document.addEventListener('keydown',event=>{if(event.key==='Escape')logoutOverlay.classList.remove('show')});
+    })();
+  </script>
+</body>
+</html>
