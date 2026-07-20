@@ -8,15 +8,23 @@
 - Web 端首页：<http://localhost:5173/qiezi-admin/>
 - Mock API：<http://localhost:3002/>
 
+## 线上地址
+
+- 移动端首页：<https://dh-1126.github.io/qiezi-admin/mobile/>
+- Web 端首页：<https://dh-1126.github.io/qiezi-admin/>
+- 后台：<https://dh-1126.github.io/qiezi-admin/admin>
+
 ## 启动
 
-在本目录运行：
+在本目录运行移动端：
 
 ```bash
 npm run dev
 ```
 
 移动端复用上一级 Web 工程中已经安装的 Vite 工具，不需要重复安装依赖。
+
+在上一级 Web 工程运行 `npm run build:all` 会把 Web、后台和移动端一起构建到 `dist`；运行 `npm run deploy` 会统一发布到 GitHub Pages。
 
 ## 页面入口
 

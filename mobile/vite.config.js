@@ -9,9 +9,9 @@ const htmlPages = Object.fromEntries(
     .map((file) => [parse(file).name, join(mobileRoot, file)]),
 )
 
-export default {
+export default ({ command }) => ({
   root: mobileRoot,
-  base: '/mobile/',
+  base: command === 'serve' ? '/mobile/' : '/qiezi-admin/mobile/',
   server: {
     host: '0.0.0.0',
     port: 5174,
@@ -23,10 +23,10 @@ export default {
     strictPort: true,
   },
   build: {
-    outDir: 'dist',
+    outDir: join(mobileRoot, '../dist/mobile'),
     emptyOutDir: true,
     rollupOptions: {
       input: htmlPages,
     },
   },
-}
+})
