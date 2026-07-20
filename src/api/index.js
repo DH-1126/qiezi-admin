@@ -1,3 +1,5 @@
+import { demoFallback } from './demoFallback';
+
 const BASE_URL = '/mock-api';
 
 export async function request(url, options = {}) {
@@ -5,21 +7,29 @@ export async function request(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${BASE_URL}${url}`, { ...options, headers });
+  try {
+    const res = await fetch(`${BASE_URL}${url}`, { ...options, headers });
 
-  if (res.status === 401) {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
-    throw new Error('未登录');
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = `${import.meta.env.BASE_URL}login`;
+      throw new Error('未登录');
+    }
+
+    if (!res.ok) {
+      const error = await res.json().catch(() => ({ message: res.statusText }));
+      throw new Error(error.message || error.error || '请求失败');
+    }
+
+    return res.json();
+  } catch (error) {
+    if (import.meta.env.PROD) {
+      const fallback = demoFallback(url, options);
+      if (fallback.handled) return fallback.data;
+    }
+    throw error;
   }
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new Error(error.message || error.error || '请求失败');
-  }
-
-  return res.json();
 }
 
 export function login(phone, code) {
