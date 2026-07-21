@@ -1,4 +1,5 @@
 .operation-page { min-height: calc(100vh - 120px); color: #333; font-size: 13px; }
+.operation-breadcrumb { padding: 8px 0 16px; font-size: 13px; }
 .operation-query { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 16px; padding: 6px 0 14px; }
 .payment-config-query { display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr)); align-items: end; }
 .operation-query:not(.payment-config-query) .operation-field { min-width: 260px; }

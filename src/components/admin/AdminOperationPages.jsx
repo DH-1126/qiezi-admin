@@ -154,15 +154,28 @@ export function SystemNoticesPage() {
   const [type,setType]=useState('');
   const [filterType,setFilterType]=useState('');
   const [selected,setSelected]=useState(new Set());
-  const [editing,setEditing]=useState(null);
+  const [showForm,setShowForm]=useState(false);
+  const [editingId,setEditingId]=useState(null);
   const [form,setForm]=useState({type:'系统公告',content:'',publishedAt:'2026-07-21T10:00'});
   const [deleting,setDeleting]=useState(null);
   const visible=rows.filter(row=>(!filterType||row.type===filterType));
-  const openForm=row=>{setEditing(row||{});setForm(row?{type:row.type,content:row.content,publishedAt:row.publishedAt.replace(' ','T').slice(0,16)}:{type:'系统公告',content:'',publishedAt:'2026-07-21T10:00'});};
-  const save=()=>{const payload={type:form.type,content:form.content,publishedAt:form.publishedAt.replace('T',' ')+':00',updatedAt:NOW,operator:'邓辉'};if(editing.id)setRows(current=>current.map(row=>row.id===editing.id?{...row,...payload}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...payload},...current]);setEditing(null);};
+  const openForm=row=>{setEditingId(row?row.id:null);setForm(row?{type:row.type,content:row.content,publishedAt:row.publishedAt.replace(' ','T').slice(0,16)}:{type:'系统公告',content:'',publishedAt:'2026-07-21T10:00'});setShowForm(true);};
+  const save=()=>{const payload={type:form.type,content:form.content,publishedAt:form.publishedAt.replace('T',' ')+':00',updatedAt:NOW,operator:'邓辉'};if(editingId)setRows(current=>current.map(row=>row.id===editingId?{...row,...payload}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...payload},...current]);setShowForm(false);setEditingId(null);};
   const removeIds=ids=>{setRows(current=>current.filter(row=>!ids.has(row.id)));setSelected(new Set());setDeleting(null);};
   const columns=[{key:'actions',label:'操作',width:110,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button className="red" onClick={()=>setDeleting(new Set([row.id]))}>删除</button></RowActions>},{key:'id',label:'公告ID',width:80},{key:'type',label:'公告分类',width:100},{key:'content',label:'公告内容',width:520,align:'left',render:row=><div className="operation-ellipsis" title={row.content}>{row.content}</div>},{key:'publishedAt',label:'公告时间',width:180},{key:'updatedAt',label:'最后修改时间',width:180},{key:'operator',label:'操作人',width:110}];
-  return <div className="operation-page"><div className="operation-query"><Field label="公告分类"><Select value={type} onChange={setType}><option value="">请选择公告分类</option>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Button primary onClick={()=>setFilterType(type)}>搜 索</Button><Button onClick={()=>{setType('');setFilterType('');}}>重 置</Button></div><div className="operation-toolbar"><Button primary onClick={()=>openForm(null)}>创建内容</Button><Button danger disabled={!selected.size} onClick={()=>setDeleting(new Set(selected))}>批量删除</Button></div><div className="operation-selection">{selected.size?`已选择 ${selected.size} 项`:'未选中任何数据'}</div><PageTable columns={columns} rows={visible} total={filterType?visible.length:49} selectable selected={selected} onSelect={setSelected} minWidth={1300}/>{editing&&<Modal title="公告内容" onClose={()=>setEditing(null)} onConfirm={save} confirmDisabled={!form.content.trim()} width="720px"><Field label="公告分类"><Select value={form.type} onChange={value=>setForm({...form,type:value})}>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Field label="公告内容" required><textarea className="operation-textarea" value={form.content} onChange={event=>setForm({...form,content:event.target.value})} placeholder="请输入公告内容"/></Field><Field label="公告时间" required><Input type="datetime-local" value={form.publishedAt} onChange={value=>setForm({...form,publishedAt:value})}/></Field></Modal>}{deleting&&<ConfirmDialog message={`确认删除选中的 ${deleting.size} 条公告吗？`} onClose={()=>setDeleting(null)} onConfirm={()=>removeIds(deleting)}/>}</div>;
+  if(showForm) return <div className="operation-page">
+    <div className="operation-breadcrumb"><span style={{color:'#1890ff',cursor:'pointer'}} onClick={()=>{setShowForm(false);setEditingId(null);}}>系统公告</span><span style={{margin:'0 8px',color:'#999'}}>/</span><span style={{color:'#333'}}>公告内容</span></div>
+    <div className="operation-card" style={{padding:24}}>
+      <Field label="公告分类"><Select value={form.type} onChange={value=>setForm({...form,type:value})}>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field>
+      <Field label="公告内容" required><textarea className="operation-textarea" value={form.content} onChange={event=>setForm({...form,content:event.target.value})} placeholder="请输入公告内容"/></Field>
+      <Field label="公告时间" required><Input type="datetime-local" value={form.publishedAt} onChange={value=>setForm({...form,publishedAt:value})}/></Field>
+      <div style={{textAlign:'center',marginTop:24}}>
+        <Button onClick={()=>{setShowForm(false);setEditingId(null);}}>取 消</Button>
+        <Button primary disabled={!form.content.trim()} onClick={save}>确认创建</Button>
+      </div>
+    </div>
+  </div>;
+  return <div className="operation-page"><div className="operation-query"><Field label="公告分类"><Select value={type} onChange={setType}><option value="">请选择公告分类</option>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Button primary onClick={()=>setFilterType(type)}>搜 索</Button><Button onClick={()=>{setType('');setFilterType('');}}>重 置</Button></div><div className="operation-toolbar"><Button primary onClick={()=>openForm(null)}>创建内容</Button><Button danger disabled={!selected.size} onClick={()=>setDeleting(new Set(selected))}>批量删除</Button></div><div className="operation-selection">{selected.size?`已选择 ${selected.size} 项`:'未选中任何数据'}</div><PageTable columns={columns} rows={visible} total={filterType?visible.length:49} selectable selected={selected} onSelect={setSelected} minWidth={1300}/>{deleting&&<ConfirmDialog message={`确认删除选中的 ${deleting.size} 条公告吗？`} onClose={()=>setDeleting(null)} onConfirm={()=>removeIds(deleting)}/>}</div>;
 }
 
 export function AdSlotsPage() {
