@@ -139,7 +139,7 @@ export function BusinessAppsPage() {
   const visible=rows.filter(row=>(!filters.appId||row.appId.includes(filters.appId))&&(!filters.name||row.name.includes(filters.name)));
   const openForm=row=>{setEditing(row||{});setForm(row?{appId:row.appId,name:row.name}:{appId:'',name:''});};
   const save=()=>{if(editing.id)setRows(current=>current.map(row=>row.id===editing.id?{...row,...form,updatedAt:NOW}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...form,createdAt:NOW,updatedAt:NOW},...current]);setEditing(null);};
-  const columns=[{key:'id',label:'子系统ID',width:110},{key:'appId',label:'子系统AppID',width:260},{key:'name',label:'子系统名称',width:220},{key:'createdAt',label:'创建时间',width:180},{key:'updatedAt',label:'更新时间',width:180},{key:'actions',label:'操作',width:130,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button className="red" onClick={event=>setDeleting({row,x:event.clientX,y:event.clientY})}>删除</button></RowActions>}];
+  const columns=[{key:'id',label:'子系统ID',width:110},{key:'appId',label:'子系统AppID',width:260},{key:'name',label:'子系统名称',width:220},{key:'createdAt',label:'创建时间',width:180},{key:'updatedAt',label:'更新时间',width:180},{key:'actions',label:'操作',width:130,render:row=><RowActions><button onClick={()=>onNavigate("公告内容")}>编辑</button><button className="red" onClick={event=>setDeleting({row,x:event.clientX,y:event.clientY})}>删除</button></RowActions>}];
   return <div className="operation-page">
     <div className="operation-query"><Field label="子系统AppID"><Input value={draft.appId} onChange={value=>setDraft({...draft,appId:value})} placeholder="请输入子系统AppID"/></Field><Field label="子系统名称"><Input value={draft.name} onChange={value=>setDraft({...draft,name:value})} placeholder="请输入子系统名称"/></Field><Button primary onClick={()=>setFilters(draft)}>查询</Button><Button onClick={()=>{const empty={appId:'',name:''};setDraft(empty);setFilters(empty);}}>重置</Button></div>
     <div className="operation-toolbar"><Button primary onClick={()=>openForm(null)}>新增</Button></div>
@@ -149,7 +149,7 @@ export function BusinessAppsPage() {
   </div>;
 }
 
-export function SystemNoticesPage() {
+export function SystemNoticesPage({onNavigate}) {
   const [rows,setRows]=useState(noticeSeed);
   const [type,setType]=useState('');
   const [filterType,setFilterType]=useState('');
@@ -162,29 +162,30 @@ export function SystemNoticesPage() {
   const openForm=row=>{setEditingId(row?row.id:null);setForm(row?{type:row.type,title:row.title||'',content:row.content,publishedAt:row.publishedAt.replace(' ','T').slice(0,16)}:{type:'帮助中心',title:'',content:'',publishedAt:'2026-07-21T10:00'});setFormErrors({});setShowForm(true);};
 
   const removeIds=ids=>{setRows(current=>current.filter(row=>!ids.has(row.id)));setSelected(new Set());setDeleting(null);};
-  const columns=[{key:'actions',label:'操作',width:110,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button className="red" onClick={()=>setDeleting(new Set([row.id]))}>删除</button></RowActions>},{key:'id',label:'公告ID',width:80},{key:'type',label:'公告分类',width:100},{key:'title',label:'公告标题',width:140,align:'left',render:row=><span style={{color:'#1890ff'}}>{row.title||'-'}</span>},{key:'content',label:'公告内容',width:400,align:'left',render:row=><div className="operation-ellipsis" title={row.content}>{row.content}</div>},{key:'publishedAt',label:'公告时间',width:180},{key:'updatedAt',label:'最后修改时间',width:180},{key:'operator',label:'操作人',width:110}];
+  const columns=[{key:'actions',label:'操作',width:110,render:row=><RowActions><button onClick={()=>onNavigate("公告内容")}>编辑</button><button className="red" onClick={()=>setDeleting(new Set([row.id]))}>删除</button></RowActions>},{key:'id',label:'公告ID',width:80},{key:'type',label:'公告分类',width:100},{key:'title',label:'公告标题',width:140,align:'left',render:row=><span style={{color:'#1890ff'}}>{row.title||'-'}</span>},{key:'content',label:'公告内容',width:400,align:'left',render:row=><div className="operation-ellipsis" title={row.content}>{row.content}</div>},{key:'publishedAt',label:'公告时间',width:180},{key:'updatedAt',label:'最后修改时间',width:180},{key:'operator',label:'操作人',width:110}];
   const [formErrors,setFormErrors]=useState({});
-  const validate=()=>{const e={};if(!form.title.trim())e.title='请输入公告标题';if(!form.type)e.type='请选择公告分类';if(!form.content.trim())e.content='请输入公告内容';if(!form.publishedAt)e.publishedAt='请选择公告时间';setFormErrors(e);return Object.keys(e).length===0;};
-  const handleSave=()=>{if(!validate())return;const payload={type:form.type,title:form.title,content:form.content,publishedAt:form.publishedAt.replace('T',' ')+':00',updatedAt:NOW,operator:'邓辉'};if(editingId)setRows(current=>current.map(row=>row.id===editingId?{...row,...payload}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...payload},...current]);setShowForm(false);setEditingId(null);};
-  if(showForm) return <div className="operation-page">
-    <div className="operation-tabs">
-      <span className="operation-tab" onClick={()=>{setShowForm(false);setEditingId(null);}}>ErrorPage</span>
-      <span className="operation-tab" onClick={()=>{setShowForm(false);setEditingId(null);}}>广告位配置</span>
-      <span className="operation-tab" onClick={()=>{setShowForm(false);setEditingId(null);}}>系统公告</span>
-      <span className="operation-tab active">公告内容</span>
-    </div>
-    <div className="operation-card" style={{padding:'24px 24px 0'}}>
-      <div className="operation-form-item" style={formErrors.title?{borderColor:'#ff4d4f'}:{}}>
+
+  return <div className="operation-page"><div className="operation-query"><Field label="公告分类"><Select value={type} onChange={setType}><option value="">请选择公告分类</option>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Button primary onClick={()=>setFilterType(type)}>搜 索</Button><Button onClick={()=>{setType('');setFilterType('');}}>重 置</Button></div><div className="operation-toolbar"><Button primary onClick={()=>onNavigate("公告内容")}>创建内容</Button><Button danger disabled={!selected.size} onClick={()=>setDeleting(new Set(selected))}>批量删除</Button></div><div className="operation-selection">{selected.size?`已选择 ${selected.size} 项`:'未选中任何数据'}</div><PageTable columns={columns} rows={visible} total={filterType?visible.length:49} selectable selected={selected} onSelect={setSelected} minWidth={1440}/>{deleting&&<ConfirmDialog message={`确认删除选中的 ${deleting.size} 条公告吗？`} onClose={()=>setDeleting(null)} onConfirm={()=>removeIds(deleting)}/>}</div>;
+}
+
+export function SystemNoticeForm({onBack}) {
+  const [form,setForm]=useState({type:"",title:"",content:"",publishedAt:"2026-07-21T10:00"});
+  const [formErrors,setFormErrors]=useState({});
+  const validate=()=>{const e={};if(!form.title.trim())e.title="请输入公告标题";if(!form.type)e.type="请选择公告分类";if(!form.content.trim())e.content="请输入公告内容";if(!form.publishedAt)e.publishedAt="请选择公告时间";setFormErrors(e);return Object.keys(e).length===0;};
+  const save=()=>{if(!validate())return;onBack();};
+  return <div className="operation-page">
+    <div className="operation-card" style={{padding:"24px 24px 0"}}>
+      <div className="operation-form-item" style={formErrors.title?{borderColor:"#ff4d4f"}:{}}>
         <div className="operation-form-label"><i>*</i>公告标题</div>
         <div className="operation-form-control">
-          <input className="operation-input" value={form.title} onChange={e=>{setForm({...form,title:e.target.value});setFormErrors({...formErrors,title:''});}} placeholder="请输入公告标题" style={formErrors.title?{borderColor:'#ff4d4f'}:{}}/>
+          <input className="operation-input" value={form.title} onChange={e=>{setForm({...form,title:e.target.value});setFormErrors({...formErrors,title:""});}} placeholder="请输入公告标题" style={formErrors.title?{borderColor:"#ff4d4f"}:{}}/>
           {formErrors.title&&<div className="operation-form-error">{formErrors.title}</div>}
         </div>
       </div>
-      <div className="operation-form-item" style={formErrors.type?{borderColor:'#ff4d4f'}:{}}>
+      <div className="operation-form-item" style={formErrors.type?{borderColor:"#ff4d4f"}:{}}>
         <div className="operation-form-label"><i>*</i>公告分类</div>
         <div className="operation-form-control">
-          <select className="operation-input" value={form.type} onChange={e=>{setForm({...form,type:e.target.value});setFormErrors({...formErrors,type:''});}} style={formErrors.type?{borderColor:'#ff4d4f'}:{}}>
+          <select className="operation-input" value={form.type} onChange={e=>{setForm({...form,type:e.target.value});setFormErrors({...formErrors,type:""});}} style={formErrors.type?{borderColor:"#ff4d4f"}:{}}>
             <option value="">请选择公告分类</option>
             {noticeTypes.map(t=><option key={t}>{t}</option>)}
           </select>
@@ -194,38 +195,37 @@ export function SystemNoticesPage() {
       <div className="operation-form-item">
         <div className="operation-form-label">公告内容</div>
         <div className="operation-form-control">
-          <div className="operation-editor-box" style={formErrors.content?{borderColor:'#ff4d4f'}:{}}>
+          <div className="operation-editor-box" style={formErrors.content?{borderColor:"#ff4d4f"}:{}}>
             <div className="operation-editor-toolbar">
-              <span className="operation-editor-select">正文 ▾</span>
+              <span className="operation-editor-select">正文 &#9662;</span>
               <span className="operation-editor-divider"/>
               <span className="operation-editor-btn" title="粗体"><b>B</b></span>
               <span className="operation-editor-btn" title="斜体"><i>I</i></span>
               <span className="operation-editor-btn" title="下划线"><u>U</u></span>
               <span className="operation-editor-divider"/>
-              <span className="operation-editor-select">默认字号 ▾</span>
-              <span className="operation-editor-select">默认字体 ▾</span>
+              <span className="operation-editor-select">默认字号 &#9662;</span>
+              <span className="operation-editor-select">默认字体 &#9662;</span>
             </div>
-            <textarea className="operation-editor-area" value={form.content} onChange={e=>{setForm({...form,content:e.target.value});setFormErrors({...formErrors,content:''});}} placeholder="请输入公告内容"/>
+            <textarea className="operation-editor-area" value={form.content} onChange={e=>{setForm({...form,content:e.target.value});setFormErrors({...formErrors,content:""});}} placeholder="请输入公告内容"/>
           </div>
           {formErrors.content&&<div className="operation-form-error">{formErrors.content}</div>}
         </div>
       </div>
-      <div className="operation-form-item" style={formErrors.publishedAt?{borderColor:'#ff4d4f'}:{}}>
+      <div className="operation-form-item" style={formErrors.publishedAt?{borderColor:"#ff4d4f"}:{}}>
         <div className="operation-form-label"><i>*</i>公告时间</div>
         <div className="operation-form-control">
-          <div style={{position:'relative',width:300}}>
-            <input className="operation-input" type="datetime-local" value={form.publishedAt} onChange={e=>{setForm({...form,publishedAt:e.target.value});setFormErrors({...formErrors,publishedAt:''});}} placeholder="请选择日期" style={{...formErrors.publishedAt?{borderColor:'#ff4d4f'}:{},width:'100%',paddingRight:30}}/>
-            <span style={{position:'absolute',right:8,top:6,color:'#999',pointerEvents:'none',fontSize:16}}>📅</span>
+          <div style={{position:"relative",width:300}}>
+            <input className="operation-input" type="datetime-local" value={form.publishedAt} onChange={e=>{setForm({...form,publishedAt:e.target.value});setFormErrors({...formErrors,publishedAt:""});}} placeholder="请选择日期" style={{...formErrors.publishedAt?{borderColor:"#ff4d4f"}:{},width:"100%",paddingRight:30}}/>
+            <span style={{position:"absolute",right:8,top:6,color:"#999",pointerEvents:"none",fontSize:16}}>&#128197;</span>
           </div>
           {formErrors.publishedAt&&<div className="operation-form-error">{formErrors.publishedAt}</div>}
         </div>
       </div>
-      <div style={{textAlign:'center',padding:'24px 0'}}>
-        <button className="operation-button primary" onClick={handleSave} style={{minWidth:120,height:36,fontSize:14}}>确认创建</button>
+      <div style={{textAlign:"center",padding:"24px 0"}}>
+        <button className="operation-button primary" onClick={save} style={{minWidth:120,height:36,fontSize:14}}>确认创建</button>
       </div>
     </div>
   </div>;
-  return <div className="operation-page"><div className="operation-query"><Field label="公告分类"><Select value={type} onChange={setType}><option value="">请选择公告分类</option>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Button primary onClick={()=>setFilterType(type)}>搜 索</Button><Button onClick={()=>{setType('');setFilterType('');}}>重 置</Button></div><div className="operation-toolbar"><Button primary onClick={()=>openForm(null)}>创建内容</Button><Button danger disabled={!selected.size} onClick={()=>setDeleting(new Set(selected))}>批量删除</Button></div><div className="operation-selection">{selected.size?`已选择 ${selected.size} 项`:'未选中任何数据'}</div><PageTable columns={columns} rows={visible} total={filterType?visible.length:49} selectable selected={selected} onSelect={setSelected} minWidth={1440}/>{deleting&&<ConfirmDialog message={`确认删除选中的 ${deleting.size} 条公告吗？`} onClose={()=>setDeleting(null)} onConfirm={()=>removeIds(deleting)}/>}</div>;
 }
 
 export function AdSlotsPage() {
@@ -241,7 +241,7 @@ export function AdSlotsPage() {
   const formInvalid=!form.name.trim()||!form.sort||!form.image||!form.status||(isFloating?(!form.h5Image||!form.jumpType||(form.jumpType==='内部页面'&&(!form.targetFeature||!form.jumpParam.trim()))):(!editing?.id&&!form.thumbnail));
   const openForm=row=>{setEditing(row||{});setForm(row?{type:row.type,name:row.name,status:row.status,sort:String(row.sort),image:row.image,thumbnail:row.thumbnail||IMAGE,h5Image:row.h5Image||'',jumpType:row.jumpType==='内部页面'?'内部页面':'外部链接',link:row.link||'',targetFeature:row.targetFeature||'',jumpParam:row.jumpParam||''}:{type:'web首页banner',name:'',status:'',sort:'',image:'',thumbnail:'',h5Image:'',jumpType:'外部链接',link:'',targetFeature:'',jumpParam:''});};
   const save=()=>{const payload={...form,sort:Number(form.sort)||1,creator:'邓辉'};if(editing.id)setRows(current=>current.map(row=>row.id===editing.id?{...row,...payload}:row));else setRows(current=>[...current,{seq:current.length+1,id:Math.max(...current.map(row=>row.id))+1,...payload,createdAt:NOW}]);setEditing(null);};
-  const columns=[{key:'seq',label:'序号',width:70},{key:'actions',label:'操作',width:160,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button onClick={()=>setRows(current=>current.map(item=>item.id===row.id?{...item,status:item.status==='启用'?'禁用':'启用'}:item))}>{row.status==='启用'?'禁用':'启用'}</button><button className="red" onClick={()=>setDeleting(row)}>删除</button></RowActions>},{key:'id',label:'ID',width:80},{key:'type',label:'广告类型',width:180},{key:'name',label:'广告名称',width:140},{key:'status',label:'状态',width:90,render:row=><Status value={row.status}/>},{key:'image',label:'图片',width:80,render:row=><button className="operation-link" onClick={()=>setPreview(row.image)}>查看</button>},{key:'sort',label:'排序',width:80},{key:'creator',label:'创建人',width:130},{key:'createdAt',label:'创建时间',width:180}];
+  const columns=[{key:'seq',label:'序号',width:70},{key:'actions',label:'操作',width:160,render:row=><RowActions><button onClick={()=>onNavigate("公告内容")}>编辑</button><button onClick={()=>setRows(current=>current.map(item=>item.id===row.id?{...item,status:item.status==='启用'?'禁用':'启用'}:item))}>{row.status==='启用'?'禁用':'启用'}</button><button className="red" onClick={()=>setDeleting(row)}>删除</button></RowActions>},{key:'id',label:'ID',width:80},{key:'type',label:'广告类型',width:180},{key:'name',label:'广告名称',width:140},{key:'status',label:'状态',width:90,render:row=><Status value={row.status}/>},{key:'image',label:'图片',width:80,render:row=><button className="operation-link" onClick={()=>setPreview(row.image)}>查看</button>},{key:'sort',label:'排序',width:80},{key:'creator',label:'创建人',width:130},{key:'createdAt',label:'创建时间',width:180}];
   return <div className="operation-page">
     <div className="operation-query operation-query-stacked"><Field label="广告类型"><Select value={draft.type} onChange={value=>setDraft({...draft,type:value})}><option value="">广告类型选择</option>{AD_TYPES.map(type=><option key={type}>{type}</option>)}</Select></Field><Field label="广告名称"><Input value={draft.name} onChange={value=>setDraft({...draft,name:value})} placeholder="请输入广告名称"/></Field><Field label="状态"><Select value={draft.status} onChange={value=>setDraft({...draft,status:value})}><option value="">状态选择</option><option>启用</option><option>禁用</option></Select></Field><div className="operation-query-actions"><Button onClick={()=>{const empty={type:'',name:'',status:''};setDraft(empty);setFilters(empty);}}>重 置</Button><Button primary onClick={()=>setFilters(draft)}>查 询</Button><Button onClick={()=>openForm(null)}>创 建</Button></div></div>
     <PageTable columns={columns} rows={visible} minWidth={1320}/>
@@ -281,7 +281,7 @@ export function PaymentChannelInfoPage() {
   const visible=rows.filter(row=>(!filters.id||String(row.id).includes(filters.id))&&(!filters.name||row.name.includes(filters.name))&&(!filters.merchantNo||row.merchantNo.includes(filters.merchantNo)));
   const openForm=row=>{setEditing(row||{});setJsonMessage('');setForm(row?{id:String(row.id),name:row.name,englishName:row.englishName,merchantNo:row.merchantNo,params:row.params}:{id:'',name:'',englishName:'',merchantNo:'',params:'{\n  "merchant_no": "",\n  "channel": ""\n}'});};
   const save=()=>{const payload={id:Number(form.id),name:form.name,englishName:form.englishName,merchantNo:form.merchantNo,params:form.params,updatedAt:NOW};if(editing.id)setRows(current=>current.map(row=>row.id===editing.id?{...row,...payload}:row));else setRows(current=>[{...payload,createdAt:NOW},...current]);setEditing(null);};
-  const columns=[{key:'id',label:'支付通道id',width:110},{key:'name',label:'支付通道名称',width:300},{key:'englishName',label:'支付通道英文名',width:150},{key:'merchantNo',label:'商户号',width:190},{key:'createdAt',label:'创建时间',width:180},{key:'updatedAt',label:'更新时间',width:180},{key:'actions',label:'操作',width:90,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button></RowActions>}];
+  const columns=[{key:'id',label:'支付通道id',width:110},{key:'name',label:'支付通道名称',width:300},{key:'englishName',label:'支付通道英文名',width:150},{key:'merchantNo',label:'商户号',width:190},{key:'createdAt',label:'创建时间',width:180},{key:'updatedAt',label:'更新时间',width:180},{key:'actions',label:'操作',width:90,render:row=><RowActions><button onClick={()=>onNavigate("公告内容")}>编辑</button></RowActions>}];
   const formatJson=()=>{try{setForm(current=>({...current,params:JSON.stringify(JSON.parse(current.params),null,2)}));setJsonMessage('');}catch{setJsonMessage('JSON格式错误');}};
   const validateJson=()=>{try{JSON.parse(form.params);setJsonMessage('JSON格式正确');}catch{setJsonMessage('JSON格式错误');}};
   return <div className="operation-page">
@@ -311,7 +311,7 @@ function PaymentConfigPage({mode='pool'}) {
   const openForm=row=>{setEditing(row||{});setForm(row?{...row,channelId:String(row.channelId),feeRate:row.feeRate||'0'}:{...blankForm});};
   const chooseChannel=value=>{const channel=channelInfoSeed.find(item=>String(item.id)===value);setForm(current=>({...current,channelId:value,channelName:channel?.name||'',englishName:channel?.englishName||'',merchantNo:channel?.merchantNo||''}));};
   const save=()=>{const payload={...form,channelId:Number(form.channelId),updatedAt:NOW};if(editing.id)setRows(current=>current.map(row=>row.id===editing.id?{...row,...payload}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...payload,createdAt:NOW},...current]);setEditing(null);};
-  const columns=[{key:'appId',label:'应用id',width:210},{key:'businessId',label:'子业务ID',width:190},{key:'channelId',label:'支付通道id',width:110},{key:'channelName',label:'支付通道名称',width:310},{key:'englishName',label:'支付通道英文名',width:140},{key:'merchantNo',label:'商户号',width:190},{key:'payType',label:'支付方式',width:150},{key:'client',label:'客户端',width:120},{key:'status',label:'状态',width:90,render:row=><Status value={row.status}/>},{key:'createdAt',label:'创建时间',width:180},{key:'updatedAt',label:'更新时间',width:180},{key:'actions',label:'操作',width:80,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button></RowActions>}];
+  const columns=[{key:'appId',label:'应用id',width:210},{key:'businessId',label:'子业务ID',width:190},{key:'channelId',label:'支付通道id',width:110},{key:'channelName',label:'支付通道名称',width:310},{key:'englishName',label:'支付通道英文名',width:140},{key:'merchantNo',label:'商户号',width:190},{key:'payType',label:'支付方式',width:150},{key:'client',label:'客户端',width:120},{key:'status',label:'状态',width:90,render:row=><Status value={row.status}/>},{key:'createdAt',label:'创建时间',width:180},{key:'updatedAt',label:'更新时间',width:180},{key:'actions',label:'操作',width:80,render:row=><RowActions><button onClick={()=>onNavigate("公告内容")}>编辑</button></RowActions>}];
   const updateDraft=(key,value)=>setDraft(current=>({...current,[key]:value}));
   const appFields=<>
     <Field label="业务应用id" required><Select value={form.appId} onChange={value=>setForm({...form,appId:value})}><option value="">请选择业务应用id</option><option value="speedMallWeb_ncb01mef">茄子商城</option><option value="leigodMallPro_pcb03dfc">雷神商城-推广平台</option></Select></Field>

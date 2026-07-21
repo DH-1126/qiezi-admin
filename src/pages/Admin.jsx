@@ -18,7 +18,7 @@ import {
   FeeConfigPage,
   PaymentChannelConfigPage,
   PaymentChannelInfoPage,
-  SystemNoticesPage,
+  SystemNoticesPage, SystemNoticeForm,
 } from '../components/admin/AdminOperationPages';
 import {
   BoundUsersPage,
@@ -301,9 +301,15 @@ function loadOrders() {
 export default function Admin() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [activeMenu, setActiveMenu] = useState('goods-manage');
-  const [expandedMenu, setExpandedMenu] = useState('goods');
-  const [activeTab, setActiveTab] = useState('商品管理');
+  const [activeMenu, setActiveMenu] = useState('');
+  const [expandedMenu, setExpandedMenu] = useState('');
+  const [activeTab, setActiveTab] = useState('');
+  const [openTabs, setOpenTabs] = useState([]);
+  const openTab = (label, menu) => {
+    setActiveTab(label);
+    setActiveMenu(menu);
+    setOpenTabs(prev => prev.includes(label) ? prev : [...prev, label]);
+  };
   const [collapsed, setCollapsed] = useState(false);
   const [selectedGoods, setSelectedGoods] = useState(null);
   const [goodsDetailReturn, setGoodsDetailReturn] = useState({ tab: '商品管理', menu: 'goods-manage' });
@@ -666,11 +672,12 @@ export default function Admin() {
             <div key={item.key}>
               <div
                 onClick={() => {
-                  if (item.children) { setExpandedMenu(expandedMenu === item.key ? '' : item.key); }
-                  else {
-                    const firstChild = item.children?.[0];
-                    if (firstChild) { setActiveMenu(firstChild.key); setActiveTab(firstChild.label); setShowWelcome(false); }
-                    else { setActiveMenu(item.key); setActiveTab(item.label); setShowWelcome(false); }
+                  if (item.children) {
+                    const first = item.children[0];
+                    openTab(first.label, first.key);
+                    setShowWelcome(false);
+                  } else {
+                    setActiveMenu(item.key); setActiveTab(item.label); setShowWelcome(false);
                   }
                 }}
                 style={{ padding: '10px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 14,
@@ -683,7 +690,7 @@ export default function Admin() {
               {item.children && expandedMenu === item.key && (
                 <div style={{ paddingLeft: 38 }}>
                   {item.children.map(child => (
-                    <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); if (child.key === 'goods-manage') setSelectedGoods(null); setShowWelcome(false); }}
+                    <div key={child.key} onClick={() => { openTab(child.label, child.key); if (child.key === 'goods-manage') setSelectedGoods(null); setShowWelcome(false); }}
                       style={{ padding: '8px 14px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px', whiteSpace: 'nowrap',
                         overflow: 'hidden', textOverflow: 'ellipsis', color: 'rgba(255,255,255,.55)', background: 'transparent' }}>
                       {child.label}
@@ -719,8 +726,10 @@ export default function Admin() {
             <div key={item.key}>
               <div
                 onClick={() => {
-                  if (item.children) { setExpandedMenu(expandedMenu === item.key ? '' : item.key); }
-                  else { setActiveMenu(item.key); setActiveTab(item.label); }
+                  if (item.children) {
+                    const first = item.children[0];
+                    openTab(first.label, first.key);
+                  } else { setActiveMenu(item.key); setActiveTab(item.label); }
                 }}
                 style={{
                   padding: '10px 24px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, fontSize: 14,
@@ -735,7 +744,7 @@ export default function Admin() {
               {!collapsed && item.children && expandedMenu === item.key && (
                 <div style={{ paddingLeft: 38 }}>
                   {item.children.map(child => (
-                    <div key={child.key} onClick={() => { setActiveMenu(child.key); setActiveTab(child.label); if (child.key === 'goods-manage') setSelectedGoods(null); }}
+                    <div key={child.key} onClick={() => { openTab(child.label, child.key); if (child.key === 'goods-manage') setSelectedGoods(null); }}
                       style={{ padding: '8px 14px', cursor: 'pointer', fontSize: 13, borderRadius: 4, margin: '2px 8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         color: activeMenu === child.key ? '#fff' : 'rgba(255,255,255,.55)', background: activeMenu === child.key ? '#1890ff' : 'transparent' }}>
                       {child.label}
@@ -745,6 +754,10 @@ export default function Admin() {
               )}
             </div>
           ))}
+        </div>
+        <div style={{ padding: '10px 24px', borderTop: '1px solid rgba(255,255,255,.1)', cursor: 'pointer', marginTop: 8 }}
+          onClick={() => { localStorage.removeItem('admin_token'); window.location.reload(); }}>
+          <span style={{ color: 'rgba(255,255,255,.4)', fontSize: 13 }}>退出登录</span>
         </div>
       </div>
 
@@ -757,17 +770,33 @@ export default function Admin() {
           <span style={{ fontSize: 13, color: '#333' }}>👤 邓辉（超级管理员）</span>
         </header>
 
-        {/* Tab 页签 */}
+        {/* Tab 页签 - 动态 */}
+        {openTabs.length > 0 && (
         <div style={{ background: '#fff', borderBottom: '1px solid #f0f0f0', padding: '0 16px', display: 'flex', flexWrap: 'nowrap', overflowX: 'auto', overflowY: 'hidden', gap: 2, height: 40, alignItems: 'flex-end', scrollbarWidth: 'none' }}>
-          {[...tabs, ...(selectedGoods ? ['商品详情页'] : []), ...(selectedBalanceAccount ? ['余额流水'] : [])].map(t => (
-            <button key={t} onClick={() => { setActiveTab(t); setActiveMenu(tabMenuMap[t] || activeMenu); setExpandedMenu(tabParentMap[t] || expandedMenu); if (t === '商品管理') setSelectedGoods(null); }}
-              style={{ padding: '6px 14px', border: 'none', cursor: 'pointer', fontSize: 13, flex: '0 0 auto', whiteSpace: 'nowrap',
-                background: activeTab === t ? '#fff' : '#fafafa', color: activeTab === t ? '#1890ff' : '#666',
-                borderBottom: activeTab === t ? '2px solid #1890ff' : '2px solid transparent', fontWeight: activeTab === t ? 600 : 400 }}>
-              {t}
-            </button>
+          {openTabs.map(t => (
+            <div key={t} style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+              <button onClick={() => { setActiveTab(t); setActiveMenu(tabMenuMap[t] || activeMenu); setExpandedMenu(tabParentMap[t] || expandedMenu); if (t === '商品管理') setSelectedGoods(null); }}
+                style={{ padding: '6px 22px 6px 14px', border: 'none', cursor: 'pointer', fontSize: 13, flex: '0 0 auto', whiteSpace: 'nowrap',
+                  background: activeTab === t ? '#fff' : '#fafafa', color: activeTab === t ? '#1890ff' : '#666',
+                  borderBottom: activeTab === t ? '2px solid #1890ff' : '2px solid transparent', fontWeight: activeTab === t ? 600 : 400 }}>
+                {t}
+              </button>
+              <span onClick={(e) => { e.stopPropagation();
+                const next = openTabs.filter(x => x !== t);
+                setOpenTabs(next);
+                if (activeTab === t) {
+                  const idx = openTabs.indexOf(t);
+                  setActiveTab(next[idx] || next[next.length-1] || '');
+                  setActiveMenu(next[idx] ? (tabMenuMap[next[idx]] || '') : '');
+                }
+              }} style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 14, color: '#999', width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 2 }}
+                onMouseEnter={e => e.target.style.background = '#e8e8e8'} onMouseLeave={e => e.target.style.background = 'transparent'}>
+                ×
+              </span>
+            </div>
           ))}
         </div>
+        )}
 
         {/* 渠道配置筛选区 */}
         {activeTab === '渠道配置' && (
@@ -1068,7 +1097,8 @@ export default function Admin() {
           {activeTab === '余额流水' && selectedBalanceAccount && <BalanceFlowPage account={selectedBalanceAccount} onBack={() => { setSelectedBalanceAccount(null); setActiveTab('账户管理'); setActiveMenu('finance-account'); setExpandedMenu('finance'); }} />}
           {activeTab === '业务应用' && <BusinessAppsPage />}
           {activeTab === '广告位配置' && <AdSlotsPage />}
-          {activeTab === '系统公告' && <SystemNoticesPage />}
+          {activeTab === '系统公告' && <SystemNoticesPage onNavigate={(tab) => openTab(tab, tabMenuMap[tab] || 'op-notice')} />}
+          {activeTab === '公告内容' && <SystemNoticeForm onBack={() => { setActiveTab('系统公告'); }} />}
           {activeTab === '支付通道信息表' && <PaymentChannelInfoPage />}
           {activeTab === '支付通道配置' && <PaymentChannelConfigPage />}
           {activeTab === '手续费配置' && <FeeConfigPage />}
