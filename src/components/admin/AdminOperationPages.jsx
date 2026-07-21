@@ -15,7 +15,7 @@ const businessSeed = [
 
 const noticeText = '1. 进入官方游戏社区后，点击左下角的“游戏加速”即可进入加速页。2. 进入加速页后，可以在右上角查看剩余加速时长，开启/暂停时长，也可以选择合适的线路一键开始加速。';
 const noticeTitles = ['系统升级公告','版本更新通知','服务暂停公告','春节放假通知','国庆活动公告','用户协议更新','隐私政策变更','支付系统维护','服务器迁移通知','优惠活动公告'];
-const noticeTypes = ['系统公告','活动公告','维护公告','更新公告'];
+const noticeTypes = ['官方公告','帮助中心','关于我们','游戏资讯','资讯热线'];
 const noticeSeed = Array.from({length:10},(_,index)=>({
   id:51-index,
   type:noticeTypes[index % noticeTypes.length],
@@ -156,26 +156,76 @@ export function SystemNoticesPage() {
   const [selected,setSelected]=useState(new Set());
   const [showForm,setShowForm]=useState(false);
   const [editingId,setEditingId]=useState(null);
-  const [form,setForm]=useState({type:'系统公告',content:'',publishedAt:'2026-07-21T10:00'});
+  const [form,setForm]=useState({type:'',title:'',content:'',publishedAt:'2026-07-21T10:00'});
   const [deleting,setDeleting]=useState(null);
   const visible=rows.filter(row=>(!filterType||row.type===filterType));
-  const openForm=row=>{setEditingId(row?row.id:null);setForm(row?{type:row.type,content:row.content,publishedAt:row.publishedAt.replace(' ','T').slice(0,16)}:{type:'系统公告',content:'',publishedAt:'2026-07-21T10:00'});setShowForm(true);};
-  const save=()=>{const payload={type:form.type,content:form.content,publishedAt:form.publishedAt.replace('T',' ')+':00',updatedAt:NOW,operator:'邓辉'};if(editingId)setRows(current=>current.map(row=>row.id===editingId?{...row,...payload}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...payload},...current]);setShowForm(false);setEditingId(null);};
+  const openForm=row=>{setEditingId(row?row.id:null);setForm(row?{type:row.type,title:row.title||'',content:row.content,publishedAt:row.publishedAt.replace(' ','T').slice(0,16)}:{type:'帮助中心',title:'',content:'',publishedAt:'2026-07-21T10:00'});setFormErrors({});setShowForm(true);};
+
   const removeIds=ids=>{setRows(current=>current.filter(row=>!ids.has(row.id)));setSelected(new Set());setDeleting(null);};
-  const columns=[{key:'actions',label:'操作',width:110,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button className="red" onClick={()=>setDeleting(new Set([row.id]))}>删除</button></RowActions>},{key:'id',label:'公告ID',width:80},{key:'type',label:'公告分类',width:100},{key:'content',label:'公告内容',width:520,align:'left',render:row=><div className="operation-ellipsis" title={row.content}>{row.content}</div>},{key:'publishedAt',label:'公告时间',width:180},{key:'updatedAt',label:'最后修改时间',width:180},{key:'operator',label:'操作人',width:110}];
+  const columns=[{key:'actions',label:'操作',width:110,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button className="red" onClick={()=>setDeleting(new Set([row.id]))}>删除</button></RowActions>},{key:'id',label:'公告ID',width:80},{key:'type',label:'公告分类',width:100},{key:'title',label:'公告标题',width:140,align:'left',render:row=><span style={{color:'#1890ff'}}>{row.title||'-'}</span>},{key:'content',label:'公告内容',width:400,align:'left',render:row=><div className="operation-ellipsis" title={row.content}>{row.content}</div>},{key:'publishedAt',label:'公告时间',width:180},{key:'updatedAt',label:'最后修改时间',width:180},{key:'operator',label:'操作人',width:110}];
+  const [formErrors,setFormErrors]=useState({});
+  const validate=()=>{const e={};if(!form.title.trim())e.title='请输入公告标题';if(!form.type)e.type='请选择公告分类';if(!form.content.trim())e.content='请输入公告内容';if(!form.publishedAt)e.publishedAt='请选择公告时间';setFormErrors(e);return Object.keys(e).length===0;};
+  const handleSave=()=>{if(!validate())return;const payload={type:form.type,title:form.title,content:form.content,publishedAt:form.publishedAt.replace('T',' ')+':00',updatedAt:NOW,operator:'邓辉'};if(editingId)setRows(current=>current.map(row=>row.id===editingId?{...row,...payload}:row));else setRows(current=>[{id:Math.max(...current.map(row=>row.id))+1,...payload},...current]);setShowForm(false);setEditingId(null);};
   if(showForm) return <div className="operation-page">
-    <div className="operation-breadcrumb"><span style={{color:'#1890ff',cursor:'pointer'}} onClick={()=>{setShowForm(false);setEditingId(null);}}>系统公告</span><span style={{margin:'0 8px',color:'#999'}}>/</span><span style={{color:'#333'}}>公告内容</span></div>
-    <div className="operation-card" style={{padding:24}}>
-      <Field label="公告分类"><Select value={form.type} onChange={value=>setForm({...form,type:value})}>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field>
-      <Field label="公告内容" required><textarea className="operation-textarea" value={form.content} onChange={event=>setForm({...form,content:event.target.value})} placeholder="请输入公告内容"/></Field>
-      <Field label="公告时间" required><Input type="datetime-local" value={form.publishedAt} onChange={value=>setForm({...form,publishedAt:value})}/></Field>
-      <div style={{textAlign:'center',marginTop:24}}>
-        <Button onClick={()=>{setShowForm(false);setEditingId(null);}}>取 消</Button>
-        <Button primary disabled={!form.content.trim()} onClick={save}>确认创建</Button>
+    <div className="operation-tabs">
+      <span className="operation-tab" onClick={()=>{setShowForm(false);setEditingId(null);}}>ErrorPage</span>
+      <span className="operation-tab" onClick={()=>{setShowForm(false);setEditingId(null);}}>广告位配置</span>
+      <span className="operation-tab" onClick={()=>{setShowForm(false);setEditingId(null);}}>系统公告</span>
+      <span className="operation-tab active">公告内容</span>
+    </div>
+    <div className="operation-card" style={{padding:'24px 24px 0'}}>
+      <div className="operation-form-item" style={formErrors.title?{borderColor:'#ff4d4f'}:{}}>
+        <div className="operation-form-label"><i>*</i>公告标题</div>
+        <div className="operation-form-control">
+          <input className="operation-input" value={form.title} onChange={e=>{setForm({...form,title:e.target.value});setFormErrors({...formErrors,title:''});}} placeholder="请输入公告标题" style={formErrors.title?{borderColor:'#ff4d4f'}:{}}/>
+          {formErrors.title&&<div className="operation-form-error">{formErrors.title}</div>}
+        </div>
+      </div>
+      <div className="operation-form-item" style={formErrors.type?{borderColor:'#ff4d4f'}:{}}>
+        <div className="operation-form-label"><i>*</i>公告分类</div>
+        <div className="operation-form-control">
+          <select className="operation-input" value={form.type} onChange={e=>{setForm({...form,type:e.target.value});setFormErrors({...formErrors,type:''});}} style={formErrors.type?{borderColor:'#ff4d4f'}:{}}>
+            <option value="">请选择公告分类</option>
+            {noticeTypes.map(t=><option key={t}>{t}</option>)}
+          </select>
+          {formErrors.type&&<div className="operation-form-error">{formErrors.type}</div>}
+        </div>
+      </div>
+      <div className="operation-form-item">
+        <div className="operation-form-label">公告内容</div>
+        <div className="operation-form-control">
+          <div className="operation-editor-box" style={formErrors.content?{borderColor:'#ff4d4f'}:{}}>
+            <div className="operation-editor-toolbar">
+              <span className="operation-editor-select">正文 ▾</span>
+              <span className="operation-editor-divider"/>
+              <span className="operation-editor-btn" title="粗体"><b>B</b></span>
+              <span className="operation-editor-btn" title="斜体"><i>I</i></span>
+              <span className="operation-editor-btn" title="下划线"><u>U</u></span>
+              <span className="operation-editor-divider"/>
+              <span className="operation-editor-select">默认字号 ▾</span>
+              <span className="operation-editor-select">默认字体 ▾</span>
+            </div>
+            <textarea className="operation-editor-area" value={form.content} onChange={e=>{setForm({...form,content:e.target.value});setFormErrors({...formErrors,content:''});}} placeholder="请输入公告内容"/>
+          </div>
+          {formErrors.content&&<div className="operation-form-error">{formErrors.content}</div>}
+        </div>
+      </div>
+      <div className="operation-form-item" style={formErrors.publishedAt?{borderColor:'#ff4d4f'}:{}}>
+        <div className="operation-form-label"><i>*</i>公告时间</div>
+        <div className="operation-form-control">
+          <div style={{position:'relative',width:300}}>
+            <input className="operation-input" type="datetime-local" value={form.publishedAt} onChange={e=>{setForm({...form,publishedAt:e.target.value});setFormErrors({...formErrors,publishedAt:''});}} placeholder="请选择日期" style={{...formErrors.publishedAt?{borderColor:'#ff4d4f'}:{},width:'100%',paddingRight:30}}/>
+            <span style={{position:'absolute',right:8,top:6,color:'#999',pointerEvents:'none',fontSize:16}}>📅</span>
+          </div>
+          {formErrors.publishedAt&&<div className="operation-form-error">{formErrors.publishedAt}</div>}
+        </div>
+      </div>
+      <div style={{textAlign:'center',padding:'24px 0'}}>
+        <button className="operation-button primary" onClick={handleSave} style={{minWidth:120,height:36,fontSize:14}}>确认创建</button>
       </div>
     </div>
   </div>;
-  return <div className="operation-page"><div className="operation-query"><Field label="公告分类"><Select value={type} onChange={setType}><option value="">请选择公告分类</option>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Button primary onClick={()=>setFilterType(type)}>搜 索</Button><Button onClick={()=>{setType('');setFilterType('');}}>重 置</Button></div><div className="operation-toolbar"><Button primary onClick={()=>openForm(null)}>创建内容</Button><Button danger disabled={!selected.size} onClick={()=>setDeleting(new Set(selected))}>批量删除</Button></div><div className="operation-selection">{selected.size?`已选择 ${selected.size} 项`:'未选中任何数据'}</div><PageTable columns={columns} rows={visible} total={filterType?visible.length:49} selectable selected={selected} onSelect={setSelected} minWidth={1300}/>{deleting&&<ConfirmDialog message={`确认删除选中的 ${deleting.size} 条公告吗？`} onClose={()=>setDeleting(null)} onConfirm={()=>removeIds(deleting)}/>}</div>;
+  return <div className="operation-page"><div className="operation-query"><Field label="公告分类"><Select value={type} onChange={setType}><option value="">请选择公告分类</option>{noticeTypes.map(t=><option key={t}>{t}</option>)}</Select></Field><Button primary onClick={()=>setFilterType(type)}>搜 索</Button><Button onClick={()=>{setType('');setFilterType('');}}>重 置</Button></div><div className="operation-toolbar"><Button primary onClick={()=>openForm(null)}>创建内容</Button><Button danger disabled={!selected.size} onClick={()=>setDeleting(new Set(selected))}>批量删除</Button></div><div className="operation-selection">{selected.size?`已选择 ${selected.size} 项`:'未选中任何数据'}</div><PageTable columns={columns} rows={visible} total={filterType?visible.length:49} selectable selected={selected} onSelect={setSelected} minWidth={1440}/>{deleting&&<ConfirmDialog message={`确认删除选中的 ${deleting.size} 条公告吗？`} onClose={()=>setDeleting(null)} onConfirm={()=>removeIds(deleting)}/>}</div>;
 }
 
 export function AdSlotsPage() {

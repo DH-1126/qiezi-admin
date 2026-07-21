@@ -1,5 +1,22 @@
 .operation-page { min-height: calc(100vh - 120px); color: #333; font-size: 13px; }
 .operation-breadcrumb { padding: 8px 0 16px; font-size: 13px; }
+.operation-tabs { display: flex; gap: 0; border-bottom: 1px solid #f0f0f0; margin-bottom: 0; }
+.operation-tab { padding: 8px 16px; font-size: 13px; color: #666; cursor: pointer; border-bottom: 2px solid transparent; background: #fff; }
+.operation-tab.active { color: #1890ff; border-bottom-color: #1890ff; }
+.operation-form-item { display: flex; align-items: flex-start; gap: 0; margin-bottom: 16px; }
+.operation-form-label { width: 110px; flex-shrink: 0; padding: 6px 12px 0 0; text-align: right; font-size: 14px; color: #333; }
+.operation-form-label i { color: #ff4d4f; font-style: normal; margin-right: 4px; }
+.operation-form-control { flex: 1; min-width: 0; }
+.operation-form-control .operation-input { width: 300px; }
+.operation-form-error { margin-top: 4px; font-size: 12px; color: #ff4d4f; }
+.operation-editor-box { border: 1px solid #d9d9d9; border-radius: 2px; overflow: hidden; }
+.operation-editor-toolbar { display: flex; align-items: center; gap: 2px; padding: 6px 10px; border-bottom: 1px solid #eee; background: #fafafa; }
+.operation-editor-btn { width: 28px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid transparent; border-radius: 2px; cursor: pointer; font-size: 13px; color: #555; }
+.operation-editor-btn:hover { border-color: #d9d9d9; background: #fff; }
+.operation-editor-select { padding: 2px 8px; font-size: 12px; color: #666; cursor: pointer; border: 1px solid transparent; border-radius: 2px; white-space: nowrap; }
+.operation-editor-select:hover { border-color: #d9d9d9; background: #fff; }
+.operation-editor-divider { width: 1px; height: 18px; background: #d9d9d9; margin: 0 4px; }
+.operation-editor-area { width: 100%; min-height: 200px; padding: 12px; border: 0; resize: vertical; font: inherit; outline: none; }
 .operation-query { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 16px; padding: 6px 0 14px; }
 .payment-config-query { display: grid; grid-template-columns: repeat(4, minmax(240px, 1fr)); align-items: end; }
 .operation-query:not(.payment-config-query) .operation-field { min-width: 260px; }
