@@ -6,11 +6,6 @@ const IMAGE = `${import.meta.env.BASE_URL}assets/card-placeholder.png`;
 const BANNER = `${import.meta.env.BASE_URL}assets/home-banner.png`;
 
 const AD_TYPES = ['web首页banner','web官方公告banner','web出哈夫币banner','web哈夫币列表banner','web二维码','H5首页banner','首页悬浮框'];
-const NOTICE_CATALOG = {
-  帮助中心:['如何查看剩余加速时长','账号交易常见问题','租赁商品使用说明'],
-  游戏资讯:['茄子商城全新版本上线','七月热门游戏活动汇总','平台安全交易公告'],
-  关于我们:['关于茄子运营平台','用户服务协议更新说明','隐私保护政策说明'],
-};
 
 const businessSeed = [
   {id:3,appId:'leigodMallPro_pcb03dfc',name:'雷神商城-推广平台',createdAt:'2023-11-03 14:14:50',updatedAt:'2023-11-03 14:14:54'},
@@ -172,13 +167,13 @@ export function AdSlotsPage() {
   const [draft,setDraft]=useState({type:'',name:'',status:''});
   const [filters,setFilters]=useState(draft);
   const [editing,setEditing]=useState(null);
-  const [form,setForm]=useState({type:'web首页banner',name:'',status:'',sort:'',image:'',thumbnail:'',h5Image:'',jumpType:'跳转链接',link:'',noticeCategory:'',noticeTitle:''});
+  const [form,setForm]=useState({type:'web首页banner',name:'',status:'',sort:'',image:'',thumbnail:'',h5Image:'',jumpType:'外部链接',link:'',targetFeature:'',jumpParam:''});
   const [deleting,setDeleting]=useState(null);
   const [preview,setPreview]=useState('');
   const visible=rows.filter(row=>(!filters.type||row.type===filters.type)&&(!filters.name||row.name.includes(filters.name.trim()))&&(!filters.status||row.status===filters.status));
   const isFloating=form.type==='首页悬浮框';
-  const formInvalid=!form.name.trim()||!form.sort||!form.image||!form.status||(isFloating?(!form.h5Image||!form.jumpType||(form.jumpType==='跳转系统公告'&&(!form.noticeCategory||!form.noticeTitle))):(!editing?.id&&!form.thumbnail));
-  const openForm=row=>{setEditing(row||{});setForm(row?{type:row.type,name:row.name,status:row.status,sort:String(row.sort),image:row.image,thumbnail:row.thumbnail||IMAGE,h5Image:row.h5Image||'',jumpType:row.jumpType||'跳转链接',link:row.link||'',noticeCategory:row.noticeCategory||'',noticeTitle:row.noticeTitle||''}:{type:'web首页banner',name:'',status:'',sort:'',image:'',thumbnail:'',h5Image:'',jumpType:'跳转链接',link:'',noticeCategory:'',noticeTitle:''});};
+  const formInvalid=!form.name.trim()||!form.sort||!form.image||!form.status||(isFloating?(!form.h5Image||!form.jumpType||(form.jumpType==='内部页面'&&(!form.targetFeature||!form.jumpParam.trim()))):(!editing?.id&&!form.thumbnail));
+  const openForm=row=>{setEditing(row||{});setForm(row?{type:row.type,name:row.name,status:row.status,sort:String(row.sort),image:row.image,thumbnail:row.thumbnail||IMAGE,h5Image:row.h5Image||'',jumpType:row.jumpType==='内部页面'?'内部页面':'外部链接',link:row.link||'',targetFeature:row.targetFeature||'',jumpParam:row.jumpParam||''}:{type:'web首页banner',name:'',status:'',sort:'',image:'',thumbnail:'',h5Image:'',jumpType:'外部链接',link:'',targetFeature:'',jumpParam:''});};
   const save=()=>{const payload={...form,sort:Number(form.sort)||1,creator:'邓辉'};if(editing.id)setRows(current=>current.map(row=>row.id===editing.id?{...row,...payload}:row));else setRows(current=>[...current,{seq:current.length+1,id:Math.max(...current.map(row=>row.id))+1,...payload,createdAt:NOW}]);setEditing(null);};
   const columns=[{key:'seq',label:'序号',width:70},{key:'actions',label:'操作',width:160,render:row=><RowActions><button onClick={()=>openForm(row)}>编辑</button><button onClick={()=>setRows(current=>current.map(item=>item.id===row.id?{...item,status:item.status==='启用'?'禁用':'启用'}:item))}>{row.status==='启用'?'禁用':'启用'}</button><button className="red" onClick={()=>setDeleting(row)}>删除</button></RowActions>},{key:'id',label:'ID',width:80},{key:'type',label:'广告类型',width:180},{key:'name',label:'广告名称',width:140},{key:'status',label:'状态',width:90,render:row=><Status value={row.status}/>},{key:'image',label:'图片',width:80,render:row=><button className="operation-link" onClick={()=>setPreview(row.image)}>查看</button>},{key:'sort',label:'排序',width:80},{key:'creator',label:'创建人',width:130},{key:'createdAt',label:'创建时间',width:180}];
   return <div className="operation-page">
@@ -193,15 +188,15 @@ export function AdSlotsPage() {
         <Field label={isFloating?'Web图片':'图片'} required><UploadBox value={form.image} label={isFloating?'请上传Web图片':'请上传广告图'} onClick={()=>setForm({...form,image:BANNER})}/></Field>
         {isFloating?<>
           <Field label="H5图片" required><UploadBox value={form.h5Image} label="请上传H5图片" onClick={()=>setForm({...form,h5Image:BANNER})}/></Field>
-          <Field label="跳转类型" required><Select value={form.jumpType} onChange={value=>setForm({...form,jumpType:value,link:value==='跳转链接'?form.link:'',noticeCategory:value==='跳转系统公告'?form.noticeCategory:'',noticeTitle:value==='跳转系统公告'?form.noticeTitle:''})}><option>跳转链接</option><option>跳转系统公告</option></Select></Field>
-          {form.jumpType==='跳转链接'&&<Field label="跳转链接"><Input value={form.link} onChange={value=>setForm({...form,link:value})} placeholder="请输入跳转链接"/></Field>}
+          <Field label="跳转类型" required><Select value={form.jumpType} onChange={value=>setForm({...form,jumpType:value,link:value==='外部链接'?form.link:'',targetFeature:value==='内部页面'?form.targetFeature:'',jumpParam:value==='内部页面'?form.jumpParam:''})}><option>外部链接</option><option>内部页面</option></Select></Field>
+          {form.jumpType==='外部链接'&&<Field label="跳转链接"><Input value={form.link} onChange={value=>setForm({...form,link:value})} placeholder="请输入跳转链接"/></Field>}
+          {form.jumpType==='内部页面'&&<>
+            <Field label="目标功能" required><Select value={form.targetFeature} onChange={value=>setForm({...form,targetFeature:value,jumpParam:''})}><option value="">请选择目标功能</option><option>系统公告</option></Select></Field>
+            <Field label="跳转参数" required><Input value={form.jumpParam} onChange={value=>setForm({...form,jumpParam:value})} placeholder={form.targetFeature==='系统公告'?'输入公告ID':''}/></Field>
+          </>}
         </>:<>
           {!editing.id&&<Field label="缩略图" required><UploadBox value={form.thumbnail} label="请上传广告缩略图" onClick={()=>setForm({...form,thumbnail:IMAGE})}/></Field>}
           <Field label="跳转链接"><Input value={form.link} onChange={value=>setForm({...form,link:value})} placeholder="请输入跳转链接"/></Field>
-        </>}
-        {isFloating&&form.jumpType==='跳转系统公告'&&<>
-          <Field label="公告分类" required><Select value={form.noticeCategory} onChange={value=>setForm({...form,noticeCategory:value,noticeTitle:''})}><option value="">请选择公告分类</option>{Object.keys(NOTICE_CATALOG).map(category=><option key={category}>{category}</option>)}</Select></Field>
-          <Field label="公告标题" required><Select value={form.noticeTitle} disabled={!form.noticeCategory} onChange={value=>setForm({...form,noticeTitle:value})}><option value="">{form.noticeCategory?'请选择公告标题':'请先选择公告分类'}</option>{(NOTICE_CATALOG[form.noticeCategory]||[]).map(title=><option key={title}>{title}</option>)}</Select></Field>
         </>}
       </div>
     </Drawer>}
