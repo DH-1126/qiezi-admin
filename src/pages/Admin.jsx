@@ -673,6 +673,7 @@ export default function Admin() {
               <div
                 onClick={() => {
                   if (item.children) {
+                    setExpandedMenu(expandedMenu === item.key ? '' : item.key);
                     const first = item.children[0];
                     openTab(first.label, first.key);
                     setShowWelcome(false);
@@ -727,6 +728,7 @@ export default function Admin() {
               <div
                 onClick={() => {
                   if (item.children) {
+                    setExpandedMenu(expandedMenu === item.key ? '' : item.key);
                     const first = item.children[0];
                     openTab(first.label, first.key);
                   } else { setActiveMenu(item.key); setActiveTab(item.label); }
