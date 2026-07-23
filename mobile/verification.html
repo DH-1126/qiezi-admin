@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <meta name="theme-color" content="#ffffff">
+  <title>茄子交易 - 实名认证</title>
+  <style>
+    :root{
+      --title:#29344a;
+      --secondary:#9eaab9;
+      --page:#f7f8fa;
+      --line:#f2f3f5;
+      --top:92px;
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#dfe3e8;color:var(--title)}
+    body{display:flex;align-items:center;justify-content:center;min-height:100dvh;overflow:hidden;font-family:"MiSans VF","MiSans","PingFang SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+    button{padding:0;border:0;outline:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    .stage{position:relative;width:375px;height:816px;flex:0 0 auto}
+    .screen{position:absolute;left:0;top:0;width:375px;height:816px;overflow:hidden;transform-origin:left top;background:var(--page);box-shadow:0 0 28px rgba(34,43,57,.12)}
+
+    .navigation{position:absolute;inset:0 0 auto;z-index:10;height:var(--top);background:#fff}
+    .statusbar{height:44px;position:relative;color:#000;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif}
+    .time{position:absolute;left:24px;top:12px;width:54px;height:21px;text-align:center;font-size:15px;font-weight:600;line-height:20px;letter-spacing:-.5px}
+    .system-icons{position:absolute;right:15px;top:16px;width:68px;height:14px;display:flex;align-items:center;justify-content:flex-end;gap:5px}
+    .signal{display:flex;align-items:flex-end;gap:1.5px;height:11px}.signal i{display:block;width:2.4px;border-radius:2px;background:#111}.signal i:nth-child(1){height:4px}.signal i:nth-child(2){height:6px}.signal i:nth-child(3){height:8px}.signal i:nth-child(4){height:11px}
+    .wifi{width:14px;height:10px;border:2px solid #111;border-left-color:transparent;border-right-color:transparent;border-bottom-color:transparent;border-radius:50%;position:relative}.wifi::after{content:"";position:absolute;left:4px;top:4px;width:3px;height:3px;border-radius:50%;background:#111}
+    .battery{width:23px;height:11px;border:1.3px solid #111;border-radius:2.5px;padding:1.5px;position:relative}.battery::before{content:"";display:block;width:16px;height:6px;border-radius:1px;background:#111}.battery::after{content:"";position:absolute;right:-3px;top:3px;width:1.5px;height:4px;border-radius:0 1px 1px 0;background:#111}
+    .nav-row{height:48px;position:relative;display:flex;align-items:center;justify-content:center;background:#fff}
+    .nav-title{margin:0;font-size:16px;font-weight:600;line-height:24px}
+    .back-button{position:absolute;left:8px;top:4px;width:40px;height:40px;display:grid;place-items:center}
+    .back-button svg{width:24px;height:24px}
+
+    .page{position:absolute;inset:var(--top) 0 0;display:none;background:var(--page)}
+    .page.active{display:block;animation:pageIn .15s ease-out}
+    @keyframes pageIn{from{opacity:.4}to{opacity:1}}
+
+    .status-card{width:351px;height:64px;margin:12px;border-radius:2px;background:#fff}
+    .certification-row{width:100%;height:100%;display:flex;align-items:center;padding:0 16px;text-align:left}
+    .id-icon{width:20px;height:20px;flex:0 0 auto}
+    .row-label{flex:1;margin-left:10px;font-size:14px;line-height:22px}
+    .row-status{margin-right:4px;color:var(--secondary);font-size:14px;line-height:22px}
+    .chevron{width:20px;height:20px;flex:0 0 auto;color:var(--secondary)}
+
+    .detail-card{width:351px;height:164px;margin:12px;border-radius:4px;overflow:hidden;background:#fff}
+    .description{height:60px;margin:0;padding:12px 16px 8px;color:var(--secondary);font-size:12px;line-height:20px}
+    .info-row{height:52px;display:flex;align-items:center;margin:0 16px;border-top:.5px solid var(--line)}
+    .info-row:first-of-type{border-top:0}
+    .info-label{flex:1;font-size:14px;line-height:22px}
+    .info-value{color:var(--secondary);font-size:14px;line-height:22px;text-align:right}
+  </style>
+  <link rel="stylesheet" crossorigin href="/qiezi-admin/mobile/assets/mobile-system-bar-DK3JC0tD.css">
+</head>
+<body>
+  <div class="stage" id="stage">
+    <main class="screen" id="prototypeScreen" aria-label="实名认证">
+      <header class="navigation">
+        <div class="statusbar" aria-hidden="true">
+          <span class="time">9:41</span>
+          <div class="system-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><span class="wifi"></span><span class="battery"></span></div>
+        </div>
+        <div class="nav-row">
+          <button class="back-button" id="backButton" aria-label="返回">
+            <svg viewBox="0 0 24 24" fill="none"><path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <h1 class="nav-title">实名认证</h1>
+        </div>
+      </header>
+
+      <section class="page active" id="statusPage" aria-label="实名认证状态">
+        <div class="status-card">
+          <button class="certification-row" id="openDetail">
+            <svg class="id-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.75" y="5" width="18.5" height="14" rx="1" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="10.5" r="2" stroke="currentColor" stroke-width="1.4"/><path d="M5.3 16c.9-2 4.5-2 5.4 0M14 10h4m-4 4h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <span class="row-label">实名认证</span>
+            <span class="row-status">已认证</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="page" id="detailPage" aria-label="实名认证详情">
+        <div class="detail-card">
+          <p class="description">我们需要收集您的姓名、身份证号、人脸信息，在实名库校验确保您是本人，且非未成年人!</p>
+          <div class="info-row"><span class="info-label">姓名</span><span class="info-value">邓辉</span></div>
+          <div class="info-row"><span class="info-label">身份证号</span><span class="info-value">420***********214</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (()=>{
+      const stage=document.getElementById('stage');
+      const screen=document.getElementById('prototypeScreen');
+      const statusPage=document.getElementById('statusPage');
+      const detailPage=document.getElementById('detailPage');
+      const fitScreen=()=>{const scale=Math.min(1,window.innerWidth/375,window.innerHeight/816);stage.style.width=`${375*scale}px`;stage.style.height=`${816*scale}px`;screen.style.transform=`scale(${scale})`};
+      const showPage=view=>{const detail=view==='detail';statusPage.classList.toggle('active',!detail);detailPage.classList.toggle('active',detail);screen.dataset.view=detail?'detail':'status'};
+
+      window.addEventListener('resize',fitScreen);fitScreen();
+      showPage(location.hash==='#detail'?'detail':'status');
+
+      document.getElementById('openDetail').addEventListener('click',()=>{
+        history.pushState({view:'detail'},'',`${location.pathname}${location.search}#detail`);
+        showPage('detail');
+      });
+      document.getElementById('backButton').addEventListener('click',()=>{
+        if(screen.dataset.view==='detail'){
+          history.replaceState({view:'status'},'',`${location.pathname}${location.search}`);
+          showPage('status');
+          return;
+        }
+        window.location.href='my.html';
+      });
+      window.addEventListener('popstate',()=>showPage(location.hash==='#detail'?'detail':'status'));
+      document.addEventListener('keydown',event=>{if(event.key==='Escape')document.getElementById('backButton').click()});
+    })();
+  </script>
+</body>
+</html>
