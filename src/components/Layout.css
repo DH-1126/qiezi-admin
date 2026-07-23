@@ -11,9 +11,11 @@
 }
 
 .site-container {
-  width: min(1800px, calc(100% - 80px));
+  width: min(1560px, calc(100% - 80px));
   margin: 0 auto;
 }
+
+.site-shell.is-seller-workbench { background: #f5f7fa; }
 
 .site-header {
   position: sticky;
@@ -29,6 +31,16 @@
   background: rgba(255, 255, 255, .96);
   box-shadow: 0 5px 15px rgba(158, 170, 185, .3);
 }
+
+.site-header.has-utility { height: 132px; }
+.site-header.has-utility .site-header-inner { height: 100px; }
+.site-utility { height: 32px; background: #fff; }
+.site-utility-inner { display: flex; height: 32px; align-items: center; justify-content: space-between; color: #29344a; font-size: 13px; }
+.site-utility-inner > div { display: flex; align-items: center; gap: 14px; }
+.site-utility-inner b { color: #ff7d00; font-weight: 400; }
+.site-utility-inner button { padding: 0; border: 0; background: transparent; color: #64687a; cursor: pointer; font-size: 13px; }
+.site-utility-inner nav { display: flex; gap: 24px; }
+.site-utility-inner nav a { color: #29344a; text-decoration: none; }
 
 .site-header-inner {
   display: flex;

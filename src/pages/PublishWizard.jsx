@@ -1,130 +1,202 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { request } from '../api';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import './PublishWizard.css';
 
-const steps = ['账号信息','账号资产','皮肤资产','交易信息'];
-const ranks = ['巅峰','钻石','铂金','黄金','白银','青铜','黑鹰','无段位'];
-const safeBoxes = ['无','黄金(2×3)','顶级(3×3)'];
+const steps = ['账号信息', '账号资产', '其他资产', '交易信息'];
+const ranks = ['三角洲巅峰', '黑鹰', '钻石', '铂金', '黄金', '白银', '青铜', '无段位'];
+const regions = ['请选择常用登录城市', '北京市', '上海市', '广州市', '深圳市', '武汉市', '杭州市', '成都市', '重庆市', '南京市'];
+const knifeSkinOptions = ['无刀皮', '处刑者', '北极星', '夜鹰', '赤枭', '黑鹰'];
+const gunSkinOptions = ['无枪皮', 'M7-棱镜攻势S2', 'AS Val-悬赏令', '银翼-未结卷宗', '疾风-西部往事'];
+const operatorSkinOptions = ['无干员外观', '未结卷宗', '西部往事', '北极星', '彦祖'];
+
+const initialForm = {
+  formSchemaVersion: 2,
+  accountType: '纯币号', server: '', accountLoginType: '', rank: '', level: '', loginRegion: '', banRecord: '', faceOwner: '', kdRatio: '',
+  hafuCoin: '', totalAsset: '', trainingCenter: '', safeBox: '', firingRange: '',
+  operatorSkins: [], gunSkins: [], knifeSkins: [],
+  settleType: 'lease_complete', ratioType: 'standard', standardRatio: '0', quickRatio: '36', netAmount: '', deposit: '', rentDays: '1', gift: '', remark: '',
+};
 
 export default function PublishWizard() {
   const navigate = useNavigate();
-  const [sp] = useSearchParams();
-  const editId = sp.get('edit');
+  const [searchParams] = useSearchParams();
+  const editing = Boolean(searchParams.get('edit'));
   const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    server:'QQ',loginMethod:'QQ',accountLoginType:'账密登录',rank:'青铜',level:60,loginRegion:'武汉',banRecord:0,faceOwner:1,
-    hafuCoin:'',totalAsset:'',trainingCenter:1,safeBox:'无',firingRange:1,kdRatio:'',
-    operatorSkins:[],gunSkins:[],knifeSkins:[],extraItemsCharge:false,extraItems:[],
-    ratioType:'standard',standardRatio:'',quickRatio:'',netAmount:'',deposit:'',rentDays:'',remark:''
-  });
+  const [form, setForm] = useState(initialForm);
+  const [agreed, setAgreed] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const banner = `${import.meta.env.BASE_URL}assets/seller/sell-hafu-banner.webp`;
 
-  useEffect(() => { const d = localStorage.getItem('publish_draft'); if (d && !editId) setForm(JSON.parse(d)); }, []);
   useEffect(() => {
-    if (editId) request(`/products/${editId}`).then(d => setForm({
-      server:d.server||'QQ',loginMethod:d.loginMethod||'QQ',accountLoginType:d.accountLoginType||'账密登录',rank:d.rank||'青铜',
-      level:d.level||60,loginRegion:d.loginRegion||'武汉',banRecord:d.banRecord==='有封禁记录'?1:0,faceOwner:d.faceOwner?1:0,
-      hafuCoin:d.hafuCoin||'',totalAsset:d.totalAsset||'',trainingCenter:d.trainingCenter||1,safeBox:d.safeBox||'无',firingRange:d.firingRange||1,kdRatio:d.kdRatio||'',
-      operatorSkins:d.skinAssets?.operatorSkins||[],gunSkins:d.skinAssets?.gunSkins||[],knifeSkins:d.skinAssets?.knifeSkins||[],
-      extraItemsCharge:(d.extraItems||[]).length>0,extraItems:d.extraItems||[],
-      ratioType:d.ratioType||'standard',standardRatio:d.ratio||'',quickRatio:'',netAmount:d.price||'',deposit:d.deposit||'',rentDays:d.rentDays||'',remark:d.remark||''
-    }));
-  }, [editId]);
+    if (editing) return;
+    localStorage.removeItem('publish_draft');
+    setForm({ ...initialForm });
+  }, [editing]);
 
-  const update = (k, v) => { const f = { ...form, [k]: v }; setForm(f); localStorage.setItem('publish_draft', JSON.stringify(f)); };
-  const handleEstimate = async () => {
-    setLoading(true);
-    try { const d = await request('/products/estimate', { method: 'POST', body: JSON.stringify({ hafuCoin: parseInt(form.hafuCoin), trainingCenter: form.trainingCenter, safeBox: form.safeBox }) });
-      update('standardRatio', d.standardRatio); update('quickRatio', d.quickRatio); update('netAmount', Math.round(d.netAmount/100)); update('deposit', Math.round(d.suggestedDeposit/100)); update('rentDays', d.suggestedPeriod); }
-    catch(e) {}
-    setLoading(false);
-  };
-  const handleNetChange = v => { update('netAmount', v); if (v && form.hafuCoin) update('standardRatio', Math.round(parseFloat(v)/parseInt(form.hafuCoin)*100)/100); };
-  const handlePublish = async () => {
-    setLoading(true);
-    try { await request('/products/publish', { method: 'POST', body: JSON.stringify({ ...form, price: parseInt(form.netAmount)*100, deposit: parseInt(form.deposit)*100, rentDays: parseInt(form.rentDays), ratio: parseInt(form.standardRatio), hafuCoin: parseInt(form.hafuCoin), totalAsset: parseInt(form.totalAsset), level: parseInt(form.level), banRecord: form.banRecord?'有封禁记录':'无封禁记录', faceOwner: !!form.faceOwner, kdRatio: parseFloat(form.kdRatio)||0, skinAssets: { operatorSkins:form.operatorSkins, gunSkins:form.gunSkins, knifeSkins:form.knifeSkins }, extraItems: form.extraItems }) });
-      localStorage.removeItem('publish_draft'); alert('发布成功！'); navigate('/seller'); }
-    catch(e) { alert(e.message); }
-    setLoading(false);
+  const update = (key, value) => {
+    setForm((current) => {
+      const next = { ...current, [key]: value };
+      localStorage.setItem('publish_draft', JSON.stringify(next));
+      return next;
+    });
   };
 
-  const btnStyle = { background: 'linear-gradient(90deg, #34393E, #252A2F)' };
+  const estimate = () => {
+    const coins = Number(form.hafuCoin || 0);
+    const level = Number(form.trainingCenter || 1);
+    const ratio = Math.max(28, 28 + level * 1.5 + (form.safeBox === '3×3' ? 2 : 0));
+    if (coins) {
+      update('standardRatio', ratio.toFixed(1));
+      update('netAmount', Math.round(coins * 100 / ratio));
+    }
+    if (!form.quickRatio) update('quickRatio', '36');
+    if (!form.rentDays) update('rentDays', '1');
+  };
+
+  const nextStep = () => {
+    if (step === 2) estimate();
+    setStep((current) => Math.min(3, current + 1));
+    window.scrollTo({ top: 210, behavior: 'smooth' });
+  };
+
+  const publish = () => {
+    if (!agreed || submitting) return;
+    setSubmitting(true);
+    window.setTimeout(() => {
+      localStorage.removeItem('publish_draft');
+      localStorage.setItem('publish_success', '1');
+      setSubmitting(false);
+      navigate('/seller/products');
+    }, 500);
+  };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-xl font-bold text-[#202125] mb-6">{editId ? '编辑商品' : '发布商品'}</h1>
-      <div className="flex mb-8">
-        {steps.map((s,i) => (
-          <button key={i} onClick={() => i<step && setStep(i)}
-            className={`flex-1 py-2 text-center text-sm rounded-lg ${i===step ? 'bg-[#202125] text-white' : i<step ? 'bg-[#F2F3F5] text-[#64687A] cursor-pointer' : 'bg-[#F7F8FA] text-[#C8CAD1]'}`}>
-            {i+1}. {s} {i<step?'✅':''}
-          </button>
+    <div className="publish-page">
+      <div className="publish-breadcrumb"><Link to="/seller/products">我要出租</Link><i>/</i><b>{editing ? '编辑商品' : '商品上架'}</b></div>
+      <img className="publish-banner" src={banner} alt="出哈夫币" />
+
+      <div className="publish-stepper" aria-label="发布进度">
+        {steps.map((name, index) => (
+          <div className={`publish-step ${index === step ? 'current' : ''} ${index < step ? 'done' : ''}`} key={name}>
+            <button type="button" onClick={() => index <= step && setStep(index)}>{index < step ? '✓' : index + 1}</button>
+            <span>第{['一','二','三','四'][index]}步：{name}</span>
+            {index < steps.length - 1 && <i />}
+          </div>
         ))}
       </div>
-      <div className="bg-white border border-[#E8EAED] rounded-xl p-6">
-        {step === 0 && <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="大区" value={form.server} onChange={v => update('server',v)} options={['QQ','微信']}/>
-            <Field label="登录方式" value={form.loginMethod} onChange={v => update('loginMethod',v)} options={['QQ','微信']}/>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="账密方式" value={form.accountLoginType} onChange={v => update('accountLoginType',v)} options={['账密登录','扫码登录']}/>
-            <Field label="段位" value={form.rank} onChange={v => update('rank',v)} options={ranks}/>
-          </div>
-          <div className="grid grid-cols-3 gap-4"><Input label="等级" value={form.level} onChange={v=>update('level',v)} type="number"/><Input label="登录地" value={form.loginRegion} onChange={v=>update('loginRegion',v)}/><Input label="绝密KD" value={form.kdRatio} onChange={v=>update('kdRatio',v)} type="number" step="0.1"/></div>
-          <label className="flex items-center gap-2 text-sm text-[#29344A]"><input type="checkbox" checked={!!form.banRecord} onChange={e=>update('banRecord',e.target.checked?1:0)}/>有封禁记录</label>
-          <label className="flex items-center gap-2 text-sm text-[#29344A]"><input type="checkbox" checked={!!form.faceOwner} onChange={e=>update('faceOwner',e.target.checked?1:0)}/>已人脸</label>
-        </div>}
 
-        {step === 1 && <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4"><Input label="哈夫币纯币(M)" value={form.hafuCoin} onChange={v=>update('hafuCoin',v)} type="number"/><Input label="总资产(M)" value={form.totalAsset} onChange={v=>update('totalAsset',v)} type="number"/></div>
-          <Input label="训练中心" value={form.trainingCenter} onChange={v=>update('trainingCenter',v)} type="number"/>
-          <Field label="安全箱" value={form.safeBox} onChange={v=>update('safeBox',v)} options={safeBoxes}/>
-          <Input label="靶场等级" value={form.firingRange} onChange={v=>update('firingRange',v)} type="number"/>
-        </div>}
+      <section className="publish-form-card">
+        <header>第{['一','二','三','四'][step]}步：{steps[step]}</header>
+        <div className="publish-form-body">
+          {step === 0 && <AccountStep form={form} update={update} />}
+          {step === 1 && <AssetStep form={form} update={update} />}
+          {step === 2 && <OtherAssetStep form={form} update={update} />}
+          {step === 3 && <TradeStep form={form} update={update} />}
+        </div>
+      </section>
 
-        {step === 2 && <div className="space-y-4">
-          <SkinSelect label="干员皮肤" value={form.operatorSkins} onChange={v=>update('operatorSkins',v)}/>
-          <SkinSelect label="枪皮" value={form.gunSkins} onChange={v=>update('gunSkins',v)}/>
-          <SkinSelect label="刀皮" value={form.knifeSkins} onChange={v=>update('knifeSkins',v)}/>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.extraItemsCharge} onChange={e=>update('extraItemsCharge',e.target.checked)}/>额外道具付费设置</label>
-          {form.extraItemsCharge && <div className="space-y-2 pl-6">{['AWM子弹','6头','6甲','红弹','巴雷特','3×3体验卡'].map(item => <div key={item} className="flex items-center gap-3"><span className="text-sm text-[#64687A] w-20">{item}</span>
-            <input type="number" placeholder="单价(元)" className="w-24 bg-[#F7F8FA] border border-[#E8EAED] rounded px-3 py-1.5 text-sm" onChange={e=>{ const its=[...form.extraItems]; const idx=its.findIndex(i=>i.name===item); if(idx>=0)its[idx]={name:item,unitPrice:parseFloat(e.target.value)||0}; else its.push({name:item,unitPrice:parseFloat(e.target.value)||0}); update('extraItems',its.filter(i=>i.unitPrice>0)); }}/></div>)}</div>}
-        </div>}
-
-        {step === 3 && <div className="space-y-4">
-          <div className="bg-[#F7F8FA] rounded-lg p-4"><div className="grid grid-cols-2 gap-3 text-sm"><div className="flex justify-between"><span className="text-[#64687A]">标准比例</span><span className="text-[#FF7D00] font-bold">{form.standardRatio||'-'}</span></div><div className="flex justify-between"><span className="text-[#64687A]">快出比例</span><span className="text-[#FF7D00] font-bold">{form.quickRatio||'-'}</span></div></div>
-            <button onClick={handleEstimate} disabled={loading||!form.hafuCoin} className="mt-3 px-4 py-2 rounded bg-[#4452A9] text-white text-sm disabled:opacity-50">{loading?'计算中...':'重新估价'}</button></div>
-          <div className="grid grid-cols-2 gap-4"><Input label="到手金额(元)" value={form.netAmount} onChange={handleNetChange} type="number"/><Input label="押金(元)" value={form.deposit} onChange={v=>update('deposit',v)} type="number"/></div>
-          <div className="grid grid-cols-2 gap-4"><Input label="推荐租期(天)" value={form.rentDays} onChange={v=>update('rentDays',v)} type="number"/>
-            <Field label="比例类型" value={form.ratioType} onChange={v=>update('ratioType',v)} options={[{v:'standard',l:'标准比例'},{v:'quick',l:'快出比例'}]}/></div>
-          <Input label="商品备注" value={form.remark} onChange={v=>update('remark',v)}/>
-        </div>}
-        <div className="flex justify-between mt-8">
-          <button onClick={()=>setStep(s=>Math.max(0,s-1))} disabled={step===0} className="px-6 py-2.5 rounded-lg bg-[#F2F3F5] text-[#64687A] hover:bg-[#E8EAED] disabled:opacity-30">上一步</button>
-          {step < 3 ? <button onClick={()=>setStep(s=>Math.min(3,s+1))} className="px-6 py-2.5 rounded-lg text-white font-bold" style={btnStyle}>下一步</button>
-          : <button onClick={handlePublish} disabled={loading} className="px-8 py-2.5 rounded-lg bg-[#017A7E] text-white font-bold disabled:opacity-50">{loading?'发布中...':'确认发布'}</button>}
+      <div className="publish-actions">
+        <label className="publish-agreement"><input type="checkbox" checked={agreed} onChange={(event) => setAgreed(event.target.checked)} /><span>发布即已阅读并同意</span><a href="#agreement">《虚拟资产租赁协议》</a></label>
+        <div>
+          {step > 0 && <button className="publish-back" type="button" onClick={() => setStep((current) => current - 1)}>上一步</button>}
+          {step < 3
+            ? <button className="publish-primary" type="button" onClick={nextStep}>下一步</button>
+            : <button className="publish-primary" type="button" disabled={!agreed || submitting} onClick={publish}>{submitting ? '提交中…' : editing ? '保存修改' : '提交审核'}</button>}
         </div>
       </div>
     </div>
   );
 }
 
-function Field({label,value,onChange,options}) {
-  return <div><label className="block text-sm text-[#29344A] mb-2">{label}</label>
-    <select value={value} onChange={e=>onChange(e.target.value)} className="w-full bg-[#F7F8FA] border border-[#E8EAED] rounded-lg px-4 py-2.5 text-sm text-[#202125]">
-      {options.map(o=> <option key={typeof o==='object'?o.v:o} value={typeof o==='object'?o.v:o}>{typeof o==='object'?o.l:o}</option>)}</select></div>;
+function AccountStep({ form, update }) {
+  return <>
+    <OptionRow required label="账号类型" value={form.accountType} options={['纯币号']} onChange={(value) => update('accountType', value)} />
+    <OptionRow required label="登录区服" value={form.server} options={['微信', 'QQ']} onChange={(value) => update('server', value)} />
+    <OptionRow required label="登录方式" value={form.accountLoginType} options={['账密登录', '扫码登录']} onChange={(value) => update('accountLoginType', value)}>
+      <p>账密登录的商品售出概率提高3倍，两种方式安全性相同，租客只登录三角洲游戏，不登录其他，号主可通过微信腾讯游戏安全中心勾选禁登游戏。<em>*因账密登录打手上号更简便快速，避免您不在线无法扫码，平台全程为您账号安全保驾护航!</em></p>
+    </OptionRow>
+    <FormRow required label="账号等级" hint="账号等级低于30无法寄售租赁"><ControlInput type="number" min="1" max="60" value={form.level} placeholder="请输入1-60之间的等级" onChange={(value) => update('level', value)} /></FormRow>
+    <OptionRow label="段位" value={form.rank} options={ranks} onChange={(value) => update('rank', value)}><p>排位段位</p></OptionRow>
+    <FormRow label="绝密KD" hint="绝密行动模式下的KD数值"><ControlInput type="number" step="0.1" min="0" max="99.9" value={form.kdRatio} placeholder="请输入绝密KD" onChange={(value) => update('kdRatio', value)} /></FormRow>
+    <OptionRow required label="封禁记录" value={form.banRecord} options={['有封号记录', '无封禁记录']} onChange={(value) => update('banRecord', value)}><p>请如实选择封禁记录，避免影响商品审核与后续交易。</p></OptionRow>
+    <FormRow label="常用登录地" hint="建议填写最近常用登录城市，可降低异地登录风险并开启WeGame账号保护。">
+      <select className="publish-control" value={form.loginRegion} onChange={(event) => update('loginRegion', event.target.value)}>{regions.map((region) => <option value={region === regions[0] ? '' : region} key={region}>{region}</option>)}</select>
+    </FormRow>
+    <OptionRow required label="人脸是否本人" value={form.faceOwner} options={['否', '是']} onChange={(value) => update('faceOwner', value)}><p>请按账号实际人脸认证情况填写。</p></OptionRow>
+  </>;
 }
-function Input({label,value,onChange,type,step}) {
-  return <div><label className="block text-sm text-[#29344A] mb-2">{label}</label>
-    <input type={type||'text'} step={step} value={value} onChange={e=>onChange(e.target.value)}
-      className="w-full bg-[#F7F8FA] border border-[#E8EAED] rounded-lg px-4 py-2.5 text-sm text-[#202125]"/></div>;
+
+function AssetStep({ form, update }) {
+  return <>
+    <FormRow required label="仓库总资产" hint="游戏仓库内所有资产的总价值，单位为M。"><ControlInput suffix="M" type="number" value={form.totalAsset} placeholder="请输入仓库总资产" onChange={(value) => update('totalAsset', value)} /></FormRow>
+    <FormRow required label="哈夫币纯币" hint="填写账号当前可使用的哈夫币数量。"><ControlInput suffix="M" type="number" value={form.hafuCoin} placeholder="请输入哈夫币纯币数量" onChange={(value) => update('hafuCoin', value)} /></FormRow>
+    <OptionRow required label="训练中心等级" value={form.trainingCenter} options={['1','2','3','4','5','6','7']} onChange={(value) => update('trainingCenter', value)} />
+    <OptionRow label="靶场等级" value={form.firingRange} options={['0','1','2','3','4','5','6','7']} onChange={(value) => update('firingRange', value)} />
+    <OptionRow required label="安全箱" value={form.safeBox} options={['无','1×1','2×2','2×3','3×3']} onChange={(value) => update('safeBox', value)}><p>选择账号当前已解锁的最大安全箱。</p></OptionRow>
+    <FormRow label="资产截图" hint="上传仓库总资产与哈夫币余额截图，最多6张。"><UploadBox /></FormRow>
+  </>;
 }
-function SkinSelect({label,value,onChange}) {
-  const [text,setText]=useState('');
-  const add = () => { if(!text.trim()) return; onChange([...value,{name:text,level:'normal'}]); setText(''); };
-  return <div><label className="block text-sm text-[#29344A] mb-2">{label}</label><div className="flex gap-2 mb-2">
-    <input value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder="输入皮肤名，回车添加" className="flex-1 bg-[#F7F8FA] border border-[#E8EAED] rounded-lg px-3 py-1.5 text-sm"/>
-    <button onClick={add} className="px-3 py-1.5 rounded bg-[#F2F3F5] text-[#64687A] text-sm">+</button></div>
-    {value.length>0 && <div className="flex flex-wrap gap-2">{value.map((s,i)=> <span key={i} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[#F7F8FA] text-xs text-[#29344A]">{s.name}<button onClick={()=>onChange(value.filter((_,j)=>j!==i))} className="text-[#9EAAB9] hover:text-red-500">×</button></span>)}</div>}</div>;
+
+function OtherAssetStep({ form, update }) {
+  return <>
+    <AssetSelectRow label="刀皮" value={form.knifeSkins} options={knifeSkinOptions} placeholder="请选择刀皮" onChange={(value) => update('knifeSkins', value)} />
+    <AssetSelectRow label="枪皮" value={form.gunSkins} options={gunSkinOptions} placeholder="请选择枪皮" onChange={(value) => update('gunSkins', value)} />
+    <AssetSelectRow label="干员外观" value={form.operatorSkins} options={operatorSkinOptions} placeholder="请选择干员外观" onChange={(value) => update('operatorSkins', value)} />
+    <FormRow required label="上传截图" hint="温馨提示：为避免使用物品产生纠纷，请上传仓库、KV、资产、藏品及收藏室界面截图；如有卡邮件或卡交易行，也须上传相应截图。截图需清楚展示物品、邮件和交易行状态。"><UploadBox label="点击上传图片" compact /></FormRow>
+    <FormRow label="商品备注" hint="温馨提示：禁止使用的物品一定要备注清楚，并说明仓库物品是否可用、打手使用是否付费。免费活动赠送的抽奖券如被使用或领取将无法补单；租客在租号期间完成任务或活动获得的奖励，租客有权免费使用。"><textarea className="publish-textarea" maxLength="200" value={form.remark} placeholder="请填写商品备注" onChange={(event) => update('remark', event.target.value)} /><small className="publish-word-count">{form.remark.length}/200</small></FormRow>
+    <FormRow label="号主赠送" hint="温馨提示：当前版本抽奖币赠品，有赠送道具的账号基本当天秒租。"><ControlInput value={form.gift} placeholder="如不赠送，请不填写" onChange={(value) => update('gift', value)} /></FormRow>
+  </>;
+}
+
+function TradeStep({ form, update }) {
+  const adjustRatio = (amount) => update('standardRatio', String(Math.max(0, Number(form.standardRatio || 0) + amount)));
+  return <>
+    <OptionRow required label="结算模式" value={form.settleType} options={[['lease_complete','租期内打完'],['negotiated_minimum','协商保底消耗']]} onChange={(value) => update('settleType', value)}>
+      <p>租期内打完：租客须在租期内消耗完账号内所有哈夫币<br />协商保底消耗：号主与租客协商约定最低哈夫币消耗量，超出部分按实际结算</p>
+    </OptionRow>
+    <FormRow required label="比例设定">
+      <div className="ratio-setting">
+        <label className={`ratio-choice ${form.ratioType === 'standard' ? 'active' : ''}`}>
+          <input type="radio" name="ratioType" checked={form.ratioType === 'standard'} onChange={() => update('ratioType', 'standard')} />
+          <b>标准比例</b><span>1元 =</span>
+          <span className="ratio-stepper"><button type="button" onClick={() => adjustRatio(-1)}>−</button><input type="number" min="0" value={form.standardRatio} onChange={(event) => update('standardRatio', event.target.value)} /><button type="button" onClick={() => adjustRatio(1)}>＋</button></span>
+          <span>万哈夫币/资产</span>
+        </label>
+        <p>温馨提示：标准比例为系统估价，流程简单，用户可以自行修改（一般2-4天有人下单）</p>
+        <label className={`ratio-choice ${form.ratioType === 'quick' ? 'active' : ''}`}>
+          <input type="radio" name="ratioType" checked={form.ratioType === 'quick'} onChange={() => update('ratioType', 'quick')} />
+          <b>快出比例</b><span>1元 =</span><strong>{form.quickRatio || 36}</strong><span>万哈夫币/资产</span>
+        </label>
+        <p>温馨提示：更多曝光，能快速吸引买家，加速成交（一般可以当天成交）</p>
+      </div>
+    </FormRow>
+    <FormRow required label="推荐租期"><ControlInput suffix="天" type="number" min="1" value={form.rentDays} placeholder="请输入推荐租期" onChange={(value) => update('rentDays', value)} /></FormRow>
+    <FormRow required label="到手金额"><ControlInput suffix="元" type="number" value={form.netAmount} placeholder="系统计算（可修改）" onChange={(value) => update('netAmount', value)} /></FormRow>
+    <FormRow required label="押金"><ControlInput suffix="元" type="number" value={form.deposit} placeholder="系统计算（可修改）" onChange={(value) => update('deposit', value)} /></FormRow>
+  </>;
+}
+
+function FormRow({ label, required, hint, children }) {
+  return <div className="publish-form-row"><label className={required ? 'required' : ''}>{label}</label><div className="publish-field">{children}{hint && <p>{hint}</p>}</div></div>;
+}
+
+function OptionRow({ label, required, value, options, onChange, children }) {
+  return <FormRow label={label} required={required}><div className="publish-options">{options.map((option) => {
+    const optionValue = Array.isArray(option) ? option[0] : option;
+    const optionLabel = Array.isArray(option) ? option[1] : option;
+    return <button type="button" className={value === optionValue ? 'active' : ''} onClick={() => onChange(optionValue)} key={optionValue}>{optionLabel}</button>;
+  })}</div>{children}</FormRow>;
+}
+
+function ControlInput({ suffix, onChange, ...props }) {
+  return <div className="publish-input-wrap"><input className="publish-control" {...props} onChange={(event) => onChange(event.target.value)} />{suffix && <span>{suffix}</span>}</div>;
+}
+
+function AssetSelectRow({ label, value, options, placeholder, onChange }) {
+  const selected = Array.isArray(value) ? value[0]?.name || '' : value || '';
+  return <FormRow label={label} hint="温馨提示：请根据实际情况勾选账号相关资产，以便账号快速出租！"><select className="publish-control asset-select" value={selected} onChange={(event) => onChange(event.target.value ? [{ name: event.target.value, level: 'normal' }] : [])}><option value="">{placeholder}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></FormRow>;
+}
+
+function UploadBox({ label = '上传图片', compact = false }) {
+  return <button className={`publish-upload ${compact ? 'compact' : ''}`} type="button"><span>＋</span><b>{label}</b>{!compact && <small>支持 JPG、PNG、WEBP</small>}</button>;
 }

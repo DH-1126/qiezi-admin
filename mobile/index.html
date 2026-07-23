@@ -189,6 +189,7 @@
     .toast{position:fixed;left:50%;bottom:105px;z-index:120;max-width:300px;padding:9px 14px;transform:translate(-50%,10px);border-radius:6px;background:rgba(27,34,43,.9);color:#fff;font-size:12px;opacity:0;pointer-events:none;transition:.2s}
     .toast.show{opacity:1;transform:translate(-50%,0)}
   </style>
+  <link rel="stylesheet" href="mobile-system-bar.css">
 </head>
 <body>
   <div class="stage" id="stage">
@@ -612,6 +613,7 @@
       document.getElementById('noticeBtn').addEventListener('click',()=>notify('公告详情将在后续页面接入'));
       document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
         if(tab.dataset.tab==='buy'){document.getElementById('contentScroll').scrollTo({top:0,behavior:'smooth'});return;}
+        if(tab.dataset.tab==='sell'){window.location.href='sell.html';return;}
         if(tab.dataset.tab==='my'){window.location.href='my.html';return;}
         notify(`${tab.textContent.trim()}页面将在后续原型中接入`);
       }));

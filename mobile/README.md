@@ -33,6 +33,8 @@ npm run dev
 - `/mobile/purchase-orders.html`：购买订单
 - `/mobile/sale-orders.html`：发布订单
 - `/mobile/wallet.html`：我的钱包与提现
+- `/mobile/sell.html`：出哈夫币发布管理、状态筛选与商品下架
+- `/mobile/publish.html`：四步渐进式商品发布、图片上传与提交校验
 - `/mobile/verification.html`：实名认证
 - `/mobile/password.html`：修改登录密码
 - `/mobile/binding.html`：第三方授权绑定

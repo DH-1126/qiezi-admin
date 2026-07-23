@@ -32,8 +32,9 @@ function AppRoutes() {
           <Route path="/kyc" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-          <Route path="/seller" element={<ProtectedRoute><SellerProducts /></ProtectedRoute>} />
-          <Route path="/publish" element={<ProtectedRoute><PublishWizard /></ProtectedRoute>} />
+          <Route path="/seller" element={<SellerProducts />} />
+          <Route path="/seller/products" element={<SellerProducts />} />
+          <Route path="/publish" element={<PublishWizard />} />
         </Route>
         <Route path="/admin" element={<Admin />} />
       </Routes>

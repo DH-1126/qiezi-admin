@@ -1,0 +1,86 @@
+.publish-page { padding: 0 20px 40px; color: #29344a; }
+.publish-breadcrumb { display: flex; height: 30px; align-items: center; gap: 9px; font-size: 14px; line-height: 22px; }
+.publish-breadcrumb a { color: #828c99; text-decoration: none; }
+.publish-breadcrumb i { color: #e5e9f2; font-style: normal; }
+.publish-breadcrumb b { color: #29344a; font-weight: 400; }
+.publish-banner { display: block; width: 100%; height: 176px; margin: 20px 0; border-radius: 2px; object-fit: fill; }
+.publish-stepper { display: flex; align-items: center; margin-bottom: 20px; padding: 20px 24px; background: #fff; }
+.publish-step { display: flex; min-width: 0; flex: 1; align-items: center; gap: 10px; color: #828c99; }
+.publish-step:last-child { flex: 0 0 auto; }
+.publish-step button { display: grid; width: 24px; height: 24px; flex: 0 0 24px; padding: 0; place-items: center; border: 0; border-radius: 50%; background: #eee; color: #828c99; font-size: 13px; line-height: 24px; }
+.publish-step.current button, .publish-step.done button { background: #202125; color: #fff; }
+.publish-step.done button { cursor: pointer; font-size: 12px; }
+.publish-step span { flex: 0 0 auto; font-size: 16px; line-height: 24px; }
+.publish-step.current span { color: #202125; font-weight: 600; }
+.publish-step.done span { color: #64687a; cursor: pointer; }
+.publish-step > i { height: 1px; flex: 1; margin: 0 24px 0 14px; background: #c9cdd4; }
+.publish-form-card { background: #fff; border-top: 1px solid #f2f3f5; }
+.publish-form-card > header { display: flex; height: 50px; align-items: center; padding: 0 24px; border-bottom: 1px solid #f2f3f5; color: #202125; font-size: 16px; font-weight: 600; }
+.publish-form-body { min-height: 510px; padding: 30px 30px 40px 12px; }
+.publish-form-row { display: flex; min-height: 36px; margin-bottom: 24px; align-items: flex-start; }
+.publish-form-row:last-child { margin-bottom: 0; }
+.publish-form-row > label { position: relative; width: 128px; flex: 0 0 128px; margin-right: 16px; color: #29344a; font-size: 14px; line-height: 36px; text-align: right; }
+.publish-form-row > label.required::before { display: inline; margin-right: 4px; color: #e13c39; content: '*'; }
+.publish-field { position: relative; min-width: 0; flex: 1; }
+.publish-field > p { max-width: 1100px; margin: 7px 0 0; color: #828c99; font-size: 12px; line-height: 20px; }
+.publish-field > p em { color: #e13c39; font-style: normal; }
+.publish-options { display: flex; flex-wrap: wrap; gap: 10px; }
+.publish-options button { min-width: 62px; min-height: 36px; padding: 7px 10px; border: 1px solid transparent; border-radius: 2px; background: #f7f8fa; color: #64687a; cursor: pointer; font-size: 14px; line-height: 20px; }
+.publish-options button:hover { color: #6091aa; }
+.publish-options button.active { border-color: #6091aa; background: rgba(96,145,170,.1); color: #6091aa; }
+.publish-control, .skin-entry, .publish-input-wrap { width: 320px; height: 36px; }
+.publish-control { padding: 0 12px; border: 1px solid transparent; border-radius: 2px; outline: 0; background: #f2f3f5; color: #29344a; font-size: 14px; }
+.publish-control:focus { border-color: #6091aa; background: #fff; }
+.publish-control::placeholder { color: #a6adb8; }
+.asset-select { appearance: auto; cursor: pointer; }
+.publish-input-wrap { position: relative; }
+.publish-input-wrap .publish-control { width: 100%; padding-right: 42px; }
+.publish-input-wrap > span { position: absolute; top: 0; right: 12px; color: #828c99; font-size: 13px; line-height: 36px; pointer-events: none; }
+.skin-entry { display: flex; overflow: hidden; border-radius: 2px; background: #f2f3f5; }
+.skin-entry input { min-width: 0; flex: 1; padding: 0 12px; border: 0; outline: 0; background: transparent; color: #29344a; font-size: 14px; }
+.skin-entry input::placeholder { color: #a6adb8; }
+.skin-entry button { width: 60px; height: 30px; margin: 3px; border: 0; border-radius: 2px; background: #202125; color: #fff; cursor: pointer; font-size: 13px; }
+.skin-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.skin-chips > span { display: inline-flex; height: 30px; align-items: center; gap: 7px; padding: 0 8px 0 10px; border: 1px solid rgba(96,145,170,.45); border-radius: 2px; background: rgba(96,145,170,.08); color: #6091aa; font-size: 13px; }
+.skin-chips button { padding: 0; border: 0; background: transparent; color: #6091aa; cursor: pointer; font-size: 16px; }
+.extra-item-grid { display: grid; max-width: 920px; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.extra-item { padding: 13px; border: 1px solid #f2f3f5; background: #f7f8fa; }
+.extra-item > b { display: block; margin-bottom: 9px; color: #29344a; font-size: 13px; }
+.extra-item label { display: inline-flex; width: calc(50% - 5px); height: 32px; align-items: center; background: #fff; }
+.extra-item label + label { margin-left: 10px; }
+.extra-item input { min-width: 0; width: 100%; padding: 0 8px; border: 0; outline: 0; background: transparent; font-size: 12px; }
+.extra-item label span { padding-right: 7px; color: #828c99; font-size: 11px; }
+.ratio-setting { display: flex; flex-direction: column; align-items: flex-start; }
+.ratio-choice { display: flex; height: 36px; align-items: center; gap: 10px; color: #64687a; cursor: pointer; font-size: 14px; }
+.ratio-choice > input { width: 14px; height: 14px; margin: 0; accent-color: #6091aa; }
+.ratio-choice > b { min-width: 62px; color: #29344a; font-size: 14px; font-weight: 500; }
+.ratio-choice > strong { min-width: 24px; color: #29344a; font-size: 14px; font-weight: 500; text-align: center; }
+.ratio-setting > p { margin: 3px 0 13px 24px; color: #828c99; font-size: 12px; line-height: 20px; }
+.ratio-setting > p:last-child { margin-bottom: 0; }
+.ratio-stepper { display: inline-flex; width: 132px; height: 36px; overflow: hidden; border-radius: 2px; background: #f2f3f5; }
+.ratio-stepper button { width: 36px; height: 36px; padding: 0; border: 0; background: transparent; color: #828c99; cursor: pointer; font-size: 17px; }
+.ratio-stepper input { min-width: 0; width: 60px; padding: 0; border: 0; outline: 0; background: transparent; color: #29344a; font-size: 14px; text-align: center; }
+.ratio-stepper input::-webkit-inner-spin-button, .ratio-stepper input::-webkit-outer-spin-button { margin: 0; appearance: none; }
+.publish-textarea { display: block; width: 530px; height: 100px; padding: 10px 12px; resize: none; border: 1px solid transparent; border-radius: 2px; outline: 0; background: #f2f3f5; color: #29344a; font-family: inherit; font-size: 14px; line-height: 22px; }
+.publish-textarea:focus { border-color: #6091aa; background: #fff; }
+.publish-textarea::placeholder { color: #a6adb8; }
+.publish-word-count { position: absolute; top: 73px; left: 482px; color: #a6adb8; font-size: 11px; }
+.publish-upload { display: flex; width: 112px; height: 112px; align-items: center; justify-content: center; flex-direction: column; gap: 3px; border: 1px dashed #c9cdd4; border-radius: 2px; background: #f7f8fa; color: #828c99; cursor: pointer; }
+.publish-upload > span { color: #a6adb8; font-size: 28px; font-weight: 200; line-height: 28px; }
+.publish-upload > b { color: #64687a; font-size: 13px; font-weight: 400; }
+.publish-upload > small { font-size: 10px; }
+.publish-upload.compact { gap: 6px; }
+.publish-actions { display: flex; min-height: 88px; align-items: center; justify-content: space-between; margin-top: 20px; padding: 20px 24px; background: #fff; }
+.publish-agreement { display: flex; align-items: center; color: #828c99; font-size: 12px; }
+.publish-agreement input { width: 14px; height: 14px; margin: 0 8px 0 0; accent-color: #202125; }
+.publish-agreement a { color: #6091aa; text-decoration: none; }
+.publish-actions > div { display: flex; gap: 12px; }
+.publish-actions button { width: 200px; height: 48px; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: 600; }
+.publish-back { border: 1px solid #c9cdd4; background: #fff; color: #29344a; }
+.publish-primary { border: 0; background: #202125; color: #fff; }
+.publish-primary:disabled { cursor: not-allowed; opacity: .5; }
+@media (max-width: 1320px) {
+  .publish-step > i { margin-right: 14px; margin-left: 8px; }
+  .publish-step span { font-size: 14px; }
+  .extra-item-grid { grid-template-columns: repeat(2, 1fr); }
+}

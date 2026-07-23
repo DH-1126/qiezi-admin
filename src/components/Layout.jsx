@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import './Layout.css';
 
 export default function Layout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [keyword, setKeyword] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const figmaAssets = `${import.meta.env.BASE_URL}assets/figma-v2/`;
   const legacyAssets = `${import.meta.env.BASE_URL}assets/web-home/`;
+  const isSellerWorkbench = location.pathname === '/seller' || location.pathname === '/seller/products';
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -24,8 +26,9 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className="site-shell">
-      <header className={`site-header ${headerScrolled ? 'is-scrolled' : 'is-at-top'}`}>
+    <div className={`site-shell ${isSellerWorkbench ? 'is-seller-workbench' : ''}`}>
+      <header className={`site-header ${isSellerWorkbench ? 'has-utility' : ''} ${headerScrolled ? 'is-scrolled' : 'is-at-top'}`}>
+        {isSellerWorkbench && <div className="site-utility"><div className="site-container site-utility-inner"><div><span>HI~ 欢迎访问茄子代售交易平台！</span><b>159****4761</b><button type="button">退出</button></div><nav><Link to="/orders">订单消息</Link><Link to="/profile">个人中心</Link><Link to="/announcements">帮助中心</Link><Link to="/announcements">关于我们</Link></nav></div></div>}
         <div className="site-container site-header-inner">
           <Link to="/" className="site-logo" aria-label="茄子代售首页">
             <img className="site-logo-mark" src={`${figmaAssets}logo-mark.svg`} alt="" />
@@ -39,8 +42,8 @@ export default function Layout() {
           </button>
 
           <nav className={`site-main-nav ${mobileMenuOpen ? 'open' : ''}`}>
-            <Link to="/" className="active" onClick={() => setMobileMenuOpen(false)}>资源号租赁</Link>
-            <Link to="/seller" onClick={() => setMobileMenuOpen(false)}>
+            <Link to="/" className={location.pathname === '/' ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>资源号租赁</Link>
+            <Link to="/seller" className={location.pathname.startsWith('/seller') || location.pathname === '/publish' ? 'active' : ''} onClick={() => setMobileMenuOpen(false)}>
               出哈夫币<img className="site-hot-badge" src={`${figmaAssets}hot-badge.svg`} alt="HOT" />
             </Link>
             <Link to="/orders" onClick={() => setMobileMenuOpen(false)}>我的订单</Link>

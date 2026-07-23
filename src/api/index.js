@@ -14,7 +14,9 @@ export async function request(url, options = {}) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = `${import.meta.env.BASE_URL}login`;
-      throw new Error('未登录');
+      const authError = new Error('未登录');
+      authError.status = 401;
+      throw authError;
     }
 
     if (!res.ok) {
@@ -24,7 +26,7 @@ export async function request(url, options = {}) {
 
     return res.json();
   } catch (error) {
-    if (import.meta.env.PROD) {
+    if (error?.status !== 401) {
       const fallback = demoFallback(url, options);
       if (fallback.handled) return fallback.data;
     }
